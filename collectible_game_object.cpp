@@ -25,31 +25,32 @@ namespace game {
     }
 
     bool CollectibleGameObject::rayCollision(ColliderObject* other) const {
-        // Ray origin and direction
-        glm::vec3 rayOrigin = GetPosition();
-        glm::vec3 rayDirection = glm::normalize(GetBearing());
+		GameObject* other_obj = dynamic_cast<GameObject*>(other);
+		// Ray origin and direction
+		glm::vec3 rayOrigin = GetPosition();
+		glm::vec3 rayDirection = glm::normalize(GetBearing());
 
-        // Circle center and radius
-        glm::vec3 circleCenter = dynamic_cast<GameObject*>(other)->GetPosition();
-        float circleRadius = other->getRadius();
+		// Circle center and radius
+		glm::vec3 circleCenter = other_obj->GetPosition();
+		float circleRadius = other->getRadius();
 
-        // Vector from ray origin to circle center
-        glm::vec3 oc = circleCenter - rayOrigin;
+		// Vector from ray origin to circle center
+		glm::vec3 oc = circleCenter - rayOrigin;
 
-        // Project oc onto the ray direction
-        float t = glm::dot(2.0f * oc, rayDirection);
+		// Project oc onto the ray direction
+		float t = glm::dot(2.0f * oc, rayDirection);
 
-        // Closest point on the ray to the circle center
-        glm::vec3 closestPoint = rayOrigin + t * rayDirection;
+		// Closest point on the ray to the circle center
+		glm::vec3 closestPoint = rayOrigin + t * rayDirection;
 
-        // Distance from the closest point to the circle center
-        float distance = glm::length(closestPoint - circleCenter);
+		// Distance from the closest point to the circle center
+		float distance = glm::length(closestPoint - circleCenter);
 
-        // Check if the distance is less than the circle's radius
-        bool intersect = distance <= circleRadius;
+		// Check if the distance is less than the circle's radius
+		bool intersect = distance <= circleRadius;
 
-        // Check if the closest point is within the max distance from the ray origin
-        float distanceFromOrigin = glm::length(closestPoint - rayOrigin);
-        return intersect && distanceFromOrigin <= (radius_ + circleRadius);
+		// Check if the closest point is within the max distance from the ray origin
+		float distanceFromOrigin = glm::length(closestPoint - rayOrigin);
+		return intersect && distanceFromOrigin <= (radius_ + circleRadius);
     }
 }

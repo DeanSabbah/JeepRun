@@ -27,12 +27,13 @@ namespace game {
 	}
 
 	bool ProjectileGameObject::rayCollision(ColliderObject* other) const {
+		GameObject* other_obj = dynamic_cast<GameObject*>(other);
 		// Ray origin and direction
 		glm::vec3 rayOrigin = GetPosition();
 		glm::vec3 rayDirection = glm::normalize(GetBearing());
 
 		// Circle center and radius
-		glm::vec3 circleCenter = dynamic_cast<GameObject*>(other)->GetPosition();
+		glm::vec3 circleCenter = other_obj->GetPosition();
 		float circleRadius = other->getRadius();
 
 		// Vector from ray origin to circle center
