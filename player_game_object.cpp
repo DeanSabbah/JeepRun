@@ -12,6 +12,7 @@ namespace game {
 		health = 3;
 		invincibility_timer = new Timer();
 		cooldown = new Timer();
+		// @TODO: add components
 	}
 
 	PlayerGameObject::~PlayerGameObject() {
@@ -28,18 +29,26 @@ namespace game {
 			invincible_ = false;
 			setTexture(1);
 		}
+		for (int i = 0; i < components_.size(); i++) {
+			components_[i]->Update(delta_time);
+		}
 		GameObject::Update(delta_time);
 	}
 
-	void PlayerGameObject::collect() {
-		collected_objs++;
-		if (collected_objs == objs_needed) {
-			// Sets player texture to the invincible texture
-			setTexture(8);
-			invincible_ = true;
-			invincibility_timer->Start(invincibility_time);
-			collected_objs = 0;
+	void PlayerGameObject::collect(const CollectibleGameObject * obj) {
+		/* TODO:Implement collect function
+		swtich obj->getType() {
+			case 0:
+				// Add health
+				break;
+			case 1:
+				// Add ammo
+				break;
+			case 2:
+				// Add invincibility
+				break;
 		}
+		*/
 	}
 
 	bool PlayerGameObject::is_invincible() const {
@@ -100,7 +109,7 @@ namespace game {
 	}
 
 	void PlayerGameObject::shoot_projectile() {
-		cooldown->Start(0.6f);
+		dynamic_cast<GunComponent*>(components_[1])->shoot();
 	}
 
 	bool PlayerGameObject::circleCollision(ColliderObject* other) const {

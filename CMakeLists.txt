@@ -12,12 +12,20 @@ set(HDRS
     player_game_object.h
     collectible_game_object.h
     enemy_game_object.h
+    wandering_enemy_object.h
+    ranged_enemy_object.h
+    kamikaze_enemy_object.h
     projectile_game_object.h
+    bullet_projectile.h
+    missile_projectile.h
     shader.h
     geometry.h
     sprite.h
     timer.h
     collider_object.h
+    component_game_object.h
+    gun_component_object.h
+    turret_component_object.h
 )
  
 set(SRCS
@@ -28,10 +36,19 @@ set(SRCS
     player_game_object.cpp
     collectible_game_object.cpp
     enemy_game_object.cpp
+    wandering_enemy_object.cpp
+    ranged_enemy_object.cpp
+    kamikaze_enemy_object.cpp
     projectile_game_object.cpp
+    bullet_projectile.cpp
+    missile_projectile.cpp
     shader.cpp
     sprite.cpp
     timer.cpp
+    collider_object.cpp
+    component_game_object.cpp
+    gun_component_object.cpp
+    turret_component_object.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
 )

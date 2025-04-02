@@ -5,6 +5,12 @@
 #include "timer.h"
 #include "projectile_game_object.h"
 #include "collider_object.h"
+#include "component_game_object.h"
+#include "collectible_game_object.h"
+#include "turret_component_object.h"
+#include "gun_component_object.h"
+
+#include <vector>
 
 namespace game {
 
@@ -19,7 +25,7 @@ namespace game {
 
             void Update(double delta_time) override;
 			// Function to collect objects
-            void collect();
+            void collect(const CollectibleGameObject *);
 			// Returns if the player is invincible
 			bool is_invincible() const;
 			// Timer for invincibility
@@ -29,6 +35,8 @@ namespace game {
 			void update_velocity(int direction);
 			// Get the velocity of the player
 			float get_velocity() const;
+			// Get component at index i
+			inline ComponentGameObject* getComponent(int i) const { return components_[i]; }
 			// Set the velocity of the player
 			void set_velocity(float velocity);
 			// Shoots a projectile
@@ -57,6 +65,9 @@ namespace game {
             bool invincible_= false;
 			// Cooldown Timer
 			Timer* cooldown;
+			// Components
+			// 0 = turret, 1 = gun
+			std::vector<ComponentGameObject*> components_;
 
     }; // class PlayerGameObject
 

@@ -13,6 +13,9 @@ namespace game {
 		void Update(double delta_time) override;
 		bool rayCollision(ColliderObject* other) const override;
 		bool circleCollision(ColliderObject* other) const override;
+		int getType() { return type; };
+	private:
+		int type;
     };
 }
 
