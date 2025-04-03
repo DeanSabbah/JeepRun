@@ -19,13 +19,13 @@ namespace game {
 
         public:
 			// Constructor
-            PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture, glm::vec2& scale, const float radius);
+            PlayerGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture, glm::vec2& scale, const float radius, GLFWwindow* window);
 			// Destructor
             ~PlayerGameObject();
 
             void Update(double delta_time) override;
 			// Function to collect objects
-            void collect(const CollectibleGameObject *);
+            void collect(const int type);
 			// Returns if the player is invincible
 			bool is_invincible() const;
 			// Timer for invincibility
@@ -35,6 +35,8 @@ namespace game {
 			void update_velocity(int direction);
 			// Get the velocity of the player
 			float get_velocity() const;
+			// Get the window
+			inline GLFWwindow* get_window() const { return window_; }
 			// Get component at index i
 			inline ComponentGameObject* getComponent(int i) const { return components_[i]; }
 			// Set the velocity of the player
@@ -68,6 +70,7 @@ namespace game {
 			// Components
 			// 0 = turret, 1 = gun
 			std::vector<ComponentGameObject*> components_;
+			GLFWwindow* window_;
 
     }; // class PlayerGameObject
 

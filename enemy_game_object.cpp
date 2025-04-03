@@ -39,9 +39,16 @@ void EnemyGameObject::Update(double delta_time) {
 }
 
 // Update the player position stored in the enemy object and calculate the distance between the player and the enemy
+// If the distance is less than 2.0f, set the state to true, else set it to false
+//@TODO: Make this virtual, overload in derived classes or make new function for setting state
 void EnemyGameObject::updatePlayerPos(glm::vec3 player_pos) {
 	player_pos_ = player_pos;
 	distance_ = glm::distance(player_pos_, position_);
+	if (distance_ < 2.0f)
+		setState(true);
+	else
+		setState(false);
+
 }
 
 // Set the state of the enemy object

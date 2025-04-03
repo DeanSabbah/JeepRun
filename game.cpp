@@ -69,7 +69,7 @@ void Game::SetupGameWorld(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.8f));
+    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.8f, window_));
     float pi_over_two = glm::pi<float>() / 2.0f;
     game_objects_[0]->SetRotation(pi_over_two);
 
@@ -149,10 +149,22 @@ void Game::HandleControls(double delta_time)
         if (glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS) {
             player->update_velocity(2);
         }
-		if (glfwGetKey(window_, GLFW_KEY_F) == GLFW_PRESS) {
-            if (!player->cooling_down()) {
+		if (glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
+            if (!gun->cooling_down()) {
+				// @TODO: Make switch to handle different types of projectiles
+                /*
+				switch(gun->getState()) {
+					case 0:
+						// shoot machine gun
+						break;
+					case 1:
+						// shoot missile
+						break;
+				}
+                */
                 player->shoot_projectile();
-                game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new ProjectileGameObject(player->GetPosition(), player->GetBearing(), sprite_, &sprite_shader_, 9, glm::vec2(1.2f, 0.8f), 5.0f, 1, 5.0f, 0.2f, true));
+                game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new ProjectileGameObject(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 9, glm::vec2(1.2f, 0.8f), 5.0f, 1, 5.0f, 0.2f, true));
             }
         }
         if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -226,9 +238,10 @@ void Game::Update(double delta_time)
                     if (!other_game_object->isDying() && current_game_object->prev_collider != other_game_object) {
 						if (collectible && !collectible->getGhostMode()) {
 							// If the object is a collectible object, collect it
-                            player->collect();
+                            player->collect(collectible->getType());
 							// Sets the object to ghost mode
 							collectible->setGhostMode(true);
+							// @TODO: Change it to delete collectible objects after collection
 						}
 						else if(!player->isDying() && enemy){
 							// Deals damage to the player and the object that the player collided with
@@ -240,15 +253,9 @@ void Game::Update(double delta_time)
 						}
                     }
                 }
-				else if (enemy) {
+				else if (enemy)
 					// If the object is an enemy object, update the player's position
-					// Way to only change state on enter/exit of range?
                     enemy->updatePlayerPos(player->GetPosition());
-                    if (distance < 2.0f)
-						enemy->setState(true);
-                    else
-						enemy->setState(false);
-				}
                 // Resets the prev collider for the player if they leave the objects collision area
                 // This is to ensure that only 1 health is removed per collision
                 else if(other_game_object == player->prev_collider)

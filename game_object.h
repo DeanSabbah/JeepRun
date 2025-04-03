@@ -49,6 +49,7 @@ namespace game {
             inline void SetPosition(const glm::vec3& position) { position_ = position; }
             inline void SetScale(glm::vec2& scale) { scale_ = scale; }
             void SetRotation(float angle);
+			inline void SetBearing(const glm::vec3& dir) { angle_ = atan2(dir.y, dir.x); }
 
 			// Set the object to be a ghost
 			void setGhostMode(bool ghost) { ghost_ = ghost; }

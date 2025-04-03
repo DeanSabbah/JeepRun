@@ -8,11 +8,14 @@ namespace game {
 		It overrides GameObject's update method, so that you can check for input to change the velocity of the player
 	*/
 
-	PlayerGameObject::PlayerGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius) : GameObject(position, geom, shader, texture, scale), ColliderObject(radius) {
+	PlayerGameObject::PlayerGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius, GLFWwindow* window) : GameObject(position, geom, shader, texture, scale), ColliderObject(radius) {
 		health = 3;
 		invincibility_timer = new Timer();
 		cooldown = new Timer();
+		window_ = window;
 		// @TODO: add components
+		components_.push_back(new TurretComponent(position, geom, shader, 6, scale, radius, this));
+		components_.push_back(new GunComponent(position, geom, shader, 5, scale, radius, components_[0]));
 	}
 
 	PlayerGameObject::~PlayerGameObject() {
@@ -22,6 +25,7 @@ namespace game {
 
 	// Update function for moving the player object around
 	void PlayerGameObject::Update(double delta_time) {
+		std::cout << "Player Pos: " << position_.x << ", " << position_.y << std::endl;
 		if(!_dying)
 			// Move player object
 			position_ += (float)delta_time * velocity_;
@@ -35,9 +39,9 @@ namespace game {
 		GameObject::Update(delta_time);
 	}
 
-	void PlayerGameObject::collect(const CollectibleGameObject * obj) {
+	void PlayerGameObject::collect(const int type) {
 		/* TODO:Implement collect function
-		swtich obj->getType() {
+		swtich (type) {
 			case 0:
 				// Add health
 				break;
@@ -109,6 +113,7 @@ namespace game {
 	}
 
 	void PlayerGameObject::shoot_projectile() {
+		// TODO: Implement shoot function
 		dynamic_cast<GunComponent*>(components_[1])->shoot();
 	}
 

@@ -6,7 +6,7 @@
 namespace game {
 	class GunComponent : public ComponentGameObject {
 	public:
-		GunComponent(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius, const GameObject* parent);
+		GunComponent(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius, GameObject* parent);
 		virtual ~GunComponent() = default;
 		// Init function
 		void init();
@@ -18,6 +18,7 @@ namespace game {
 
 		// Gun functions
 		inline void shoot() { cooldown_timer->Start(fire_rate_); };
+		inline bool cooling_down() { return !cooldown_timer->Finished(); }
 	private:
 		void Update(double delta_time) override;
 		int state_ = 0; // 0 = machine gun, 1 = missile @TODO: add raygun if time allows
