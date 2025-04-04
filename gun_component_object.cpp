@@ -24,6 +24,7 @@ void GunComponent::setState(const int s) {
 }
 
 void GunComponent::Update(double delta_time) {
+	position_ = parent_->GetPosition();
 	SetRotation(parent_->GetRotation());
 	GameObject::Update(delta_time);
 }

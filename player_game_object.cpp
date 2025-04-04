@@ -25,7 +25,6 @@ namespace game {
 
 	// Update function for moving the player object around
 	void PlayerGameObject::Update(double delta_time) {
-		std::cout << "Player Pos: " << position_.x << ", " << position_.y << std::endl;
 		if(!_dying)
 			// Move player object
 			position_ += (float)delta_time * velocity_;

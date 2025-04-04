@@ -304,6 +304,10 @@ void Game::Render(void){
 
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
+        if (i == 0) {
+            dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(0)->Render(view_matrix, current_time_);
+            dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(1)->Render(view_matrix, current_time_);
+        }
         game_objects_[i]->Render(view_matrix, current_time_);
     }
 }

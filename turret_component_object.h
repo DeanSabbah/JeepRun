@@ -16,7 +16,7 @@ namespace game {
 		void RotateTurret(double delta_time);
 
 		void Update(double delta_time) override;
-		float rotation_speed_ = 1.0f;
+		float rotation_speed_ = 2.0f;
 		glm::vec3 target_dir_;
 	};
 }
