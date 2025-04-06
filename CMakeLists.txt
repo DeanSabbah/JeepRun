@@ -26,6 +26,9 @@ set(HDRS
     component_game_object.h
     gun_component_object.h
     turret_component_object.h
+    particles.h
+    particle_system.h
+    explosion.h
 )
  
 set(SRCS
@@ -45,12 +48,16 @@ set(SRCS
     shader.cpp
     sprite.cpp
     timer.cpp
-    collider_object.cpp
     component_game_object.cpp
     gun_component_object.cpp
     turret_component_object.cpp
+    particles.cpp
+    particle_system.cpp
+    explosion.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
+    particle_vertex_shader.glsl
+    particle_fragment_shader.glsl
 )
 
 # Add path name to configuration file

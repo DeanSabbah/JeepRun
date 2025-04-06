@@ -7,12 +7,9 @@
 namespace game {
     class BulletProjectile : public ProjectileGameObject {
     public:
-        BulletProjectile(const glm::vec3& position, glm::vec3& bearing, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float speed, const int damage, const float time, const float radius, const bool type);
+        BulletProjectile(const glm::vec3& position, glm::vec3& bearing, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float speed, const int damage, const float time, const float radius);
         ~BulletProjectile();
         void Update(double delta_time) override;
-        // Collision functions
-        bool circleCollision(ColliderObject* other) const override;
-        bool rayCollision(ColliderObject* other) const override;
 
     };
 }

@@ -15,7 +15,7 @@ namespace game {
 		window_ = window;
 		// @TODO: add components
 		components_.push_back(new TurretComponent(position, geom, shader, 6, scale, radius, this));
-		components_.push_back(new GunComponent(position, geom, shader, 5, scale, radius, components_[0]));
+		components_.push_back(new GunComponent(position, geom, shader, 9, scale, radius, components_[0]));
 	}
 
 	PlayerGameObject::~PlayerGameObject() {

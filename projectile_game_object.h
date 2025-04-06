@@ -16,7 +16,7 @@ namespace game {
 		bool rayCollision(ColliderObject* other) const override;
 
 		int getDamage() const { return damage_; }
-	private:
+	protected:
 		const float speed_;
 		const int damage_;
 	};

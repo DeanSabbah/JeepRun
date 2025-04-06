@@ -22,8 +22,6 @@ void TurretComponent::GetTargetDir() {
 
 	// Get the turret's position
 	glm::vec3 turret_pos = GetPosition();
-
-	// Assuming the origin is at the center of the screen, convert NDC to world coordinates
 	glm::vec3 mouse_world = glm::vec3(mouse_ndc.x * width / 2.0f, mouse_ndc.y * height / 2.0f, 0.0f);
 
 	// Get the direction from the turret to the mouse position

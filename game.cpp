@@ -12,8 +12,11 @@
 #include "player_game_object.h"
 #include "collectible_game_object.h"
 #include "enemy_game_object.h"
-#include "projectile_game_object.h"
+#include "bullet_projectile.h"
+#include "missile_projectile.h"
 #include "game.h"
+#include "particles.h"
+#include "particle_system.h"
 #include <time.h>
 
 namespace game {
@@ -51,7 +54,9 @@ void Game::SetupGameWorld(void)
            explosion = 5,
            yellow_orb = 6,
            invincible = 7,
-           fireball = 8};
+           fireball = 8,
+           bullet = 9,
+           missile = 10};
     textures.push_back("/textures/Ship_4.png"); 
     textures.push_back("/textures/Ship_2.png"); 
     textures.push_back("/textures/Ship_5.png");
@@ -61,6 +66,8 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/orb_yellow.png");
 	textures.push_back("/textures/Player_invincible.png");
 	textures.push_back("/textures/FireBall.png");
+	textures.push_back("/textures/bullet.png");
+	textures.push_back("/textures/roc.png");
     // Load textures
     LoadTextures(textures);
 
@@ -96,6 +103,12 @@ void Game::SetupGameWorld(void)
 			game_objects_.push_back(background);
         }
     }
+
+    GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &particle_shader_, tex_[4], game_objects_[0]);
+    particles->SetScale(glm::vec2(0.2));
+    particles->SetRotation(-pi_over_two);
+    game_objects_.push_back(particles);
+
 
 	spawn_timer = new Timer();
 }
@@ -149,22 +162,28 @@ void Game::HandleControls(double delta_time)
         if (glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS) {
             player->update_velocity(2);
         }
+        if (glfwGetKey(window_, GLFW_KEY_1) == GLFW_PRESS) {
+			std::cout << "One pressed" << std::endl;
+			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
+			gun->setState(0);
+        }
+        if (glfwGetKey(window_, GLFW_KEY_2) == GLFW_PRESS) {
+			std::cout << "Two pressed" << std::endl;
+            GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
+            gun->setState(1);
+        }
 		if (glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
             if (!gun->cooling_down()) {
-				// @TODO: Make switch to handle different types of projectiles
-                /*
 				switch(gun->getState()) {
 					case 0:
-						// shoot machine gun
+                        game_objects_.insert(game_objects_.begin() + 1, new BulletProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
 						break;
 					case 1:
-						// shoot missile
+						game_objects_.insert(game_objects_.begin() + 1, new MissileProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 11, glm::vec2(0.8, 0.5), 5.0f, 1, 5.0f, 0.2f));
 						break;
 				}
-                */
                 player->shoot_projectile();
-                game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new ProjectileGameObject(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 9, glm::vec2(1.2f, 0.8f), 5.0f, 1, 5.0f, 0.2f, true));
             }
         }
         if (glfwGetKey(window_, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -226,8 +245,6 @@ void Game::Update(double delta_time)
             EnemyGameObject* enemy = dynamic_cast<EnemyGameObject*>(other_game_object);
             // Evaluate if the other game object is a Collider Object
             ColliderObject* collider = dynamic_cast<ColliderObject*>(other_game_object);
-			// Evaluate if other game object is a projectile object
-			ProjectileGameObject* projectile = dynamic_cast<ProjectileGameObject*>(other_game_object);
 			//Evaluate if other game object is a collectible object
 			CollectibleGameObject* collectible = dynamic_cast<CollectibleGameObject*>(other_game_object);
             // Compute distance between object i and object j
@@ -261,14 +278,14 @@ void Game::Update(double delta_time)
                 else if(other_game_object == player->prev_collider)
                     current_game_object->prev_collider = nullptr;
             }
-            else if (enemy_curr) {
+            else if (projectile_curr) {
 				//check if enemy is colliding with projectile
-                if (projectile && projectile->collide(enemy_curr) && !enemy_curr->isDying()) {
-					enemy_curr->hurt();
+                if (enemy && projectile_curr->collide(enemy) && !enemy->isDying()) {
+					enemy->hurt();
 					// Remove the projectile from the game world
-					game_objects_.erase(game_objects_.begin() + j);
-					delete other_game_object;
-                    continue;
+					game_objects_.erase(game_objects_.begin() + i);
+					delete current_game_object;
+                    break;
                 }
             }
         }
@@ -305,8 +322,8 @@ void Game::Render(void){
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
         if (i == 0) {
-            dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(0)->Render(view_matrix, current_time_);
             dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(1)->Render(view_matrix, current_time_);
+            dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(0)->Render(view_matrix, current_time_);
         }
         game_objects_[i]->Render(view_matrix, current_time_);
     }
@@ -352,6 +369,8 @@ Game::Game(void)
 
 void Game::Init(void)
 {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Initialize the window management library (GLFW)
     if (!glfwInit()) {
@@ -386,8 +405,16 @@ void Game::Init(void)
     sprite_ = new Sprite();
     sprite_->CreateGeometry();
 
+    // Initialize particle geometry
+    Particles* particles_temp = new Particles();
+    particles_temp->CreateGeometry(4000); // Use 4000 particles
+    particles_ = particles_temp;
+
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g+std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/sprite_fragment_shader.glsl")).c_str());
+
+    // Initialize particle shader
+    particle_shader_.Init((resources_directory_g + std::string("/particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
 
     // Initialize time
     current_time_ = 0.0;
