@@ -163,12 +163,10 @@ void Game::HandleControls(double delta_time)
             player->update_velocity(2);
         }
         if (glfwGetKey(window_, GLFW_KEY_1) == GLFW_PRESS) {
-			std::cout << "One pressed" << std::endl;
 			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
 			gun->setState(0);
         }
         if (glfwGetKey(window_, GLFW_KEY_2) == GLFW_PRESS) {
-			std::cout << "Two pressed" << std::endl;
             GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
             gun->setState(1);
         }
@@ -177,7 +175,7 @@ void Game::HandleControls(double delta_time)
             if (!gun->cooling_down()) {
 				switch(gun->getState()) {
 					case 0:
-                        game_objects_.insert(game_objects_.begin() + 1, new BulletProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+                        //game_objects_.insert(game_objects_.begin() + 1, new BulletProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
 						break;
 					case 1:
 						game_objects_.insert(game_objects_.begin() + 1, new MissileProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 11, glm::vec2(0.8, 0.5), 5.0f, 1, 5.0f, 0.2f));

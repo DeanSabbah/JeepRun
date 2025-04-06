@@ -35,6 +35,7 @@ namespace game {
 		for (int i = 0; i < components_.size(); i++) {
 			components_[i]->Update(delta_time);
 		}
+		std::cout << position_[0] << ", " << position_[1] << std::endl;
 		GameObject::Update(delta_time);
 	}
 
