@@ -209,6 +209,7 @@ void Game::Update(double delta_time)
         GameObject* current_game_object = game_objects_[i];
 		// Evaluate if the current game object is a projectile object
         ProjectileGameObject* projectile_curr = dynamic_cast<ProjectileGameObject*>(current_game_object);
+        EnemyProjectileObject* ranged_enemy_proj = dynamic_cast<EnemyProjectileObject*>(current_game_object);
 		// Evaluate if the current game object is an explosion object
 		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);
         // Evaluate if the current game object is a ranged enemy object
@@ -221,10 +222,12 @@ void Game::Update(double delta_time)
             delete current_game_object;
             continue;
         }
-        if (ranged_enemy_curr) {
+        if (ranged_enemy_curr && !ranged_enemy_curr->isDying()) {
             ranged_enemy_curr->updatePlayerPos(player->GetPosition());
             if (ranged_enemy_curr->getShootTimer()->Finished()) {
+				std::cout << "Enemy Shooting" << std::endl;
                 game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+				ranged_enemy_curr->getShootTimer()->Start(2);
             }
         }
             
@@ -256,10 +259,8 @@ void Game::Update(double delta_time)
             EnemyGameObject* enemy = dynamic_cast<EnemyGameObject*>(other_game_object);
             // Evaluate if the other game object is a Collider Object
             ColliderObject* collider = dynamic_cast<ColliderObject*>(other_game_object);
-			//Evaluate if other game object is a collectible object
+			// Evaluate if other game object is a collectible object
 			CollectibleGameObject* collectible = dynamic_cast<CollectibleGameObject*>(other_game_object);
-
-            EnemyProjectileObject* ranged_enemy_proj = dynamic_cast<EnemyProjectileObject*>(other_game_object);
             // Compute distance between object i and object j
             float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
             if (current_game_object == player) {
@@ -291,7 +292,7 @@ void Game::Update(double delta_time)
                 else if(other_game_object == player->prev_collider)
                     current_game_object->prev_collider = nullptr;
             }
-            else if (projectile_curr && !ranged_enemy_curr) {
+            else if (projectile_curr && !ranged_enemy_proj) {
 				//check if enemy is colliding with projectile
                 if (enemy && projectile_curr->collide(enemy) && !enemy->isDying()) {
 					BulletProjectile* bull = dynamic_cast<BulletProjectile*>(current_game_object);
@@ -318,6 +319,17 @@ void Game::Update(double delta_time)
                         exp_->timer->Start(1);
 						particles->timer->Start(1);
 					}
+                    break;
+                }
+            }
+            else if (ranged_enemy_proj) {
+                if (ranged_enemy_proj->collide(player) && !player->isDying()) {
+					std::cout << "Player hit by enemy projectile" << std::endl;
+					// If the object is a ranged enemy projectile, deal damage to the player
+					player->hurt();
+					// Remove the projectile from the game world
+					game_objects_.erase(game_objects_.begin() + i);
+					delete current_game_object;
                     break;
                 }
             }
