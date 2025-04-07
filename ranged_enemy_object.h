@@ -18,7 +18,7 @@ namespace game {
 		~RangedEnemyObject() override;
         void Update(double delta_time) override;
         //void updatePlayerPos(glm::vec3 player_pos) override;
-
+        inline bool inRange() const{ return distance_ <= range_; }
 		// Determine the state of the enemy object
 		void determineState() override;
 

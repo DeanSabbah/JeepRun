@@ -104,7 +104,6 @@ void EnemyGameObject::intercept(double delta_time) {
 	SetPosition(position_ + (velocity_ * 0.001f * (float)delta_time * speed_));
 	// Update the distance to the player, so that when the enemy is far enough, it will patrol around it's current locaiton
 	center_ = position_;
-
 }
 
 bool EnemyGameObject::circleCollision(ColliderObject* other) const {

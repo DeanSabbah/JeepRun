@@ -81,7 +81,7 @@ void Game::SetupGameWorld(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.8f, window_));
+    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.6f, window_));
     float pi_over_two = glm::pi<float>() / 2.0f;
     game_objects_[0]->SetRotation(pi_over_two);
 
@@ -222,12 +222,35 @@ void Game::Update(double delta_time)
             delete current_game_object;
             continue;
         }
-        if (ranged_enemy_curr && !ranged_enemy_curr->isDying()) {
+        if(ranged_enemy_curr && !ranged_enemy_curr->isDying() && ranged_enemy_curr->inRange()) {
             ranged_enemy_curr->updatePlayerPos(player->GetPosition());
-            if (ranged_enemy_curr->getShootTimer()->Finished()) {
-				std::cout << "Enemy Shooting" << std::endl;
-                game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
-				ranged_enemy_curr->getShootTimer()->Start(2);
+
+            // Calculate direction vectors
+            glm::vec3 player_pos = player->GetPosition();
+            glm::vec3 enemy_pos = ranged_enemy_curr->GetPosition();
+            glm::vec3 direction_to_player = glm::normalize(player_pos - enemy_pos);
+
+            // Assuming the enemy's forward direction is along the x-axis after applying its rotation
+            glm::vec3 enemy_forward = glm::vec3(cos(ranged_enemy_curr->GetRotation()), sin(ranged_enemy_curr->GetRotation()), 0.0f);
+
+            // Normalize vectors
+            direction_to_player = glm::normalize(direction_to_player);
+            enemy_forward = glm::normalize(enemy_forward);
+
+            // Calculate dot product
+            float dot_product = glm::dot(direction_to_player, enemy_forward);
+
+            // Calculate angle
+            float angle = acos(dot_product); // Angle in radians
+            float angle_degrees = glm::degrees(angle);
+
+            // Check if the player is within ±30 degrees
+            if (angle_degrees <= 30.0f) {
+                // Player is within ±30 degrees of where the enemy is looking
+                if (ranged_enemy_curr->getShootTimer()->Finished()) {
+                    game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[10], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+                    ranged_enemy_curr->getShootTimer()->Start(2);
+                }
             }
         }
             
@@ -324,7 +347,6 @@ void Game::Update(double delta_time)
             }
             else if (ranged_enemy_proj) {
                 if (ranged_enemy_proj->collide(player) && !player->isDying()) {
-					std::cout << "Player hit by enemy projectile" << std::endl;
 					// If the object is a ranged enemy projectile, deal damage to the player
 					player->hurt();
 					// Remove the projectile from the game world
@@ -382,7 +404,7 @@ void Game::Render(void){
     }
 
     // Set view to zoom out, centered by default at 0,0
-    float camera_zoom = 0.25f;
+    float camera_zoom = 0.2f;
     glm::mat4 camera_zoom_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(camera_zoom, camera_zoom, camera_zoom));
 	glm::mat4 camera_translation_matrix = glm::translate(glm::mat4(1.0f), -game_objects_[0]->GetPosition());
     glm::mat4 view_matrix = window_scale_matrix * camera_zoom_matrix * camera_translation_matrix;

@@ -98,18 +98,13 @@ Timer* RangedEnemyObject::getShootTimer() {
 }
 
 void RangedEnemyObject::retreat(double delta_time) {
-	glm::vec3 new_pos;
-	// Get the new position
 	// Moves away from the player
 	// Finds the angle to the player
 	float angle = atan2(player_pos_.y - position_.y, player_pos_.x - position_.x);
 	// Sets the angle to the opposite direction
 	angle += glm::pi<float>();
-	// Sets the new position
-	new_pos.x = position_.x + (speed_ * cos(angle) * float(delta_time));
-	new_pos.y = position_.y + (speed_ * sin(angle) * float(delta_time));
-	// Set rotation to forward
-	SetRotation(atan2(new_pos.y - position_.y, new_pos.x - position_.x));
+	// Find the new velocity
+	velocity_ = glm::vec3(cos(angle), sin(angle), 0);
 	// Set the new position
-	SetPosition(new_pos);
+	SetPosition(position_ + (velocity_ * 0.001f * (float)delta_time * speed_));
 }
