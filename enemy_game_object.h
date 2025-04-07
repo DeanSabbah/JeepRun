@@ -14,8 +14,9 @@ namespace game {
 			~EnemyGameObject();
 			void Update(double delta_time) override;
 			virtual void updatePlayerPos(glm::vec3 player_pos);
-			void setState(bool state);
-			bool getState() const;
+			void setState(int state);
+			int getState() const;
+			virtual void determineState();
 			float getSpeed() const;
 			glm::vec3 getPLayerPos() const;
 			glm::vec3 getVelocity() const;
@@ -23,28 +24,26 @@ namespace game {
 			bool circleCollision(ColliderObject* other) const override;
 			bool rayCollision(ColliderObject* other) const override;
 		protected:
-			// Object's velcity
+			// Object's velocity
 			glm::vec3 velocity_;
 			// Object's speed
 			const float speed_ = 420.0f;
 			// Enemy states
-			void patrol(double delta_time);
-			void intercept(double delta_time);
+			virtual void patrol(double delta_time);
+			virtual void intercept(double delta_time);
 			// Player position
 			glm::vec3 player_pos_;
 			// Distance from player
 			float distance_ = NULL;
 			// Boolean switch for movement state
 			// Can change to int later for more states
-			bool state_ = false;
+			int state_ = false;
 			// Center to patrol
 			glm::vec3 center_;
 			// Patrol height
 			float height_ = NULL;
 			// Patrol radius
 			float radius_ = NULL;
-
-			Timer* move_timer;
 	};
 }
 

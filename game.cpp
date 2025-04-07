@@ -207,7 +207,7 @@ void Game::Update(double delta_time)
     for (int i = 0; i < game_objects_.size(); i++) {
         // Get the current game object
         GameObject* current_game_object = game_objects_[i];
-		    // Evaluate if the current game object is a projectile object
+		// Evaluate if the current game object is a projectile object
         ProjectileGameObject* projectile_curr = dynamic_cast<ProjectileGameObject*>(current_game_object);
 		// Evaluate if the current game object is an explosion object
 		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);

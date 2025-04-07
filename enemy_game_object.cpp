@@ -21,11 +21,9 @@ EnemyGameObject::EnemyGameObject(const glm::vec3& position, Geometry* geom, Shad
 	else {
 		center_ = glm::vec3(position.x - radius_, position.y - height_, 0.0f);
 	}
-	move_timer = new Timer();
 }
 
 EnemyGameObject::~EnemyGameObject() {
-	delete move_timer;
 	GameObject::~GameObject();
 }
 
@@ -33,10 +31,14 @@ void EnemyGameObject::Update(double delta_time) {
 	// If the enemy is close enough to the player, it will intercept the player
 	// Will not move the enemy if they are dying
 	if (!_dying) {
-		if (state_)
+		switch (state_) {
+		case Intercept:
 			intercept(delta_time);
-		else
+			break;
+		case Patrol:
 			patrol(delta_time);
+			break;
+		}
 	}
 
 	// Update function for moving the enemy object around
@@ -49,20 +51,24 @@ void EnemyGameObject::Update(double delta_time) {
 void EnemyGameObject::updatePlayerPos(glm::vec3 player_pos) {
 	player_pos_ = player_pos;
 	distance_ = glm::distance(player_pos_, position_);
-	if (distance_ < 2.0f)
-		setState(true);
-	else
-		setState(false);
-
+	determineState();
 }
 
 // Set the state of the enemy object
-void EnemyGameObject::setState(bool state) {
+void EnemyGameObject::setState(int state) {
 	state_ = state;
 }
 
-bool EnemyGameObject::getState() const {
+int EnemyGameObject::getState() const {
 	return state_;
+}
+
+void EnemyGameObject::determineState() {
+	// If the distance to the player is less than 2.0f, set the state to true, else set it to false
+	if (distance_ < 2.0f)
+		state_ = Intercept;
+	else
+		state_ = Patrol;
 }
 
 float EnemyGameObject::getSpeed() const {
@@ -90,14 +96,10 @@ void EnemyGameObject::patrol(double delta_time) {
 }
 
 void EnemyGameObject::intercept(double delta_time) {
-	if (move_timer->Finished()) {
-		// Get the direction to the player
-		velocity_= glm::normalize(player_pos_ - position_);
-		// Start the timer for the next direction update
-		move_timer->Start(2);
-		// Set rotation to forward
-		SetRotation(atan2(velocity_.y, velocity_.x));
-	}
+	// Get the direction to the player
+	velocity_= glm::normalize(player_pos_ - position_);
+	// Set rotation to forward
+	SetRotation(atan2(velocity_.y, velocity_.x));
 	// Set the new position
 	SetPosition(position_ + (velocity_ * 0.001f * (float)delta_time * speed_));
 	// Update the distance to the player, so that when the enemy is far enough, it will patrol around it's current locaiton
