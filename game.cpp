@@ -12,8 +12,11 @@
 #include "player_game_object.h"
 #include "collectible_game_object.h"
 #include "enemy_game_object.h"
+#include "wandering_enemy_object.h"
+#include "ranged_enemy_object.h"
 #include "bullet_projectile.h"
 #include "missile_projectile.h"
+#include "enemy_projectile_object.h"
 #include "game.h"
 #include "particles.h"
 #include "particle_system.h"
@@ -81,9 +84,9 @@ void Game::SetupGameWorld(void)
     game_objects_[0]->SetRotation(pi_over_two);
 
     // Setup other objects
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(-1.0f, 1.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.5f));
+    game_objects_.push_back(new RangedEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.5f));
     game_objects_[1]->SetRotation(pi_over_two);
-    game_objects_.push_back(new EnemyGameObject(glm::vec3(1.0f, -0.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.5f));
+    game_objects_.push_back(new RangedEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.5f));
     game_objects_[2]->SetRotation(pi_over_two);
 	// Setup collectible objects in random locations
 	for (int i = 0; i < 90; i++) {
@@ -202,10 +205,11 @@ void Game::Update(double delta_time)
     for (int i = 0; i < game_objects_.size(); i++) {
         // Get the current game object
         GameObject* current_game_object = game_objects_[i];
-		// Evaluate if the current game object is a projectile object
+		    // Evaluate if the current game object is a projectile object
         ProjectileGameObject* projectile_curr = dynamic_cast<ProjectileGameObject*>(current_game_object);
         MissileProjectile* miss = dynamic_cast<MissileProjectile*>(current_game_object);
-		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);
+        // Evaluate if the current game object is a ranged enemy object
+        RangedEnemyObject* ranged_enemy_curr = dynamic_cast<RangedEnemyObject*>(current_game_object);
         // Update the current game object
         current_game_object->Update(delta_time);
         // Projectile handling
@@ -214,6 +218,13 @@ void Game::Update(double delta_time)
             delete current_game_object;
             continue;
         }
+        if (ranged_enemy_curr) {
+            ranged_enemy_curr->updatePlayerPos(player->GetPosition());
+            if (ranged_enemy_curr->getShootTimer()->Finished()) {
+                game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+            }
+        }
+            
 		// Check if the object is dying
         else if (current_game_object->isDying()) {
             // If the object is dying, check if the timer has finished
@@ -244,6 +255,8 @@ void Game::Update(double delta_time)
             ColliderObject* collider = dynamic_cast<ColliderObject*>(other_game_object);
 			//Evaluate if other game object is a collectible object
 			CollectibleGameObject* collectible = dynamic_cast<CollectibleGameObject*>(other_game_object);
+
+            EnemyProjectileObject* ranged_enemy_proj = dynamic_cast<EnemyProjectileObject*>(other_game_object);
             // Compute distance between object i and object j
             float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
             if (current_game_object == player) {
@@ -275,7 +288,7 @@ void Game::Update(double delta_time)
                 else if(other_game_object == player->prev_collider)
                     current_game_object->prev_collider = nullptr;
             }
-            else if (projectile_curr) {
+            else if (projectile_curr && !ranged_enemy_curr) {
 				//check if enemy is colliding with projectile
                 if (enemy && projectile_curr->collide(enemy) && !enemy->isDying()) {
 					BulletProjectile* bull = dynamic_cast<BulletProjectile*>(current_game_object);

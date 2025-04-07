@@ -64,6 +64,14 @@ float EnemyGameObject::getSpeed() const {
 	return speed_;
 }
 
+glm::vec3 EnemyGameObject::getVelocity() const {
+	return velocity_;
+}
+
+glm::vec3 EnemyGameObject::getPLayerPos() const{
+	return player_pos_;
+}
+
 void EnemyGameObject::patrol(double delta_time) {
 	glm::vec3 new_pos;
 	// Get the new position
