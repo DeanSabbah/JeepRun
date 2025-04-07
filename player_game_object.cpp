@@ -38,6 +38,14 @@ namespace game {
 		GameObject::Update(delta_time);
 	}
 
+	void PlayerGameObject::Render(glm::mat4 view_matrix, double current_time) {
+		// Call the render function for all components
+		for (int i = components_.size() - 1; i >= 0; i--) {
+			components_[i]->Render(view_matrix, current_time);
+		}
+		GameObject::Render(view_matrix, current_time);
+	}
+
 	void PlayerGameObject::collect(const int type) {
 		/* TODO:Implement collect function
 		swtich (type) {

@@ -17,7 +17,7 @@
 #include "game.h"
 #include "particles.h"
 #include "particle_system.h"
-#include <time.h>
+#include "explosion.h"
 
 namespace game {
 
@@ -104,11 +104,10 @@ void Game::SetupGameWorld(void)
         }
     }
 
-    GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &particle_shader_, tex_[4], game_objects_[0]);
+    /*GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[tex_orb], game_objects_[0]);
     particles->SetScale(glm::vec2(0.2));
     particles->SetRotation(-pi_over_two);
-    game_objects_.push_back(particles);
-
+    game_objects_.push_back(particles);*/
 
 	spawn_timer = new Timer();
 }
@@ -163,12 +162,10 @@ void Game::HandleControls(double delta_time)
             player->update_velocity(2);
         }
         if (glfwGetKey(window_, GLFW_KEY_1) == GLFW_PRESS) {
-			std::cout << "One pressed" << std::endl;
 			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
 			gun->setState(0);
         }
         if (glfwGetKey(window_, GLFW_KEY_2) == GLFW_PRESS) {
-			std::cout << "Two pressed" << std::endl;
             GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
             gun->setState(1);
         }
@@ -207,8 +204,8 @@ void Game::Update(double delta_time)
         GameObject* current_game_object = game_objects_[i];
 		// Evaluate if the current game object is a projectile object
         ProjectileGameObject* projectile_curr = dynamic_cast<ProjectileGameObject*>(current_game_object);
-		// Evaluate if the current game object is an enemy object
-		EnemyGameObject* enemy_curr = dynamic_cast<EnemyGameObject*>(current_game_object);
+        MissileProjectile* miss = dynamic_cast<MissileProjectile*>(current_game_object);
+		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);
         // Update the current game object
         current_game_object->Update(delta_time);
         // Projectile handling
@@ -239,7 +236,7 @@ void Game::Update(double delta_time)
         // Check for collision with other game objects
         // Note the loop bounds: we avoid testing the last 9 objects since
         // they are the background covering the whole game world
-        for (int j = i + 1; j < (game_objects_.size()-9); j++) {
+        for (int j = i + 1; j < (game_objects_.size() - BACKGROUND_OBJECTS); j++) {
             GameObject* other_game_object = game_objects_[j];
 			// Evaluate if the other game object is an enemy object
             EnemyGameObject* enemy = dynamic_cast<EnemyGameObject*>(other_game_object);
@@ -281,15 +278,57 @@ void Game::Update(double delta_time)
             else if (projectile_curr) {
 				//check if enemy is colliding with projectile
                 if (enemy && projectile_curr->collide(enemy) && !enemy->isDying()) {
-					enemy->hurt();
-					// Remove the projectile from the game world
-					game_objects_.erase(game_objects_.begin() + i);
-					delete current_game_object;
+					BulletProjectile* bull = dynamic_cast<BulletProjectile*>(current_game_object);
+					if (bull) {
+						// If the object is a bullet projectile, deal damage to the enemy
+						enemy->hurt();
+                        // Remove the projectile from the game world
+					    game_objects_.erase(game_objects_.begin() + i);
+					    delete current_game_object;
+					}
+					else if (miss) {
+                        float pi_over_two = glm::pi<float>() / 2.0f;
+						// If the object is a missile projectile, create an explosion
+						Explosion * exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &explosion_shader_, NULL, glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
+                        GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[4], exp_);
+                        particles->SetScale(glm::vec2(0.2));
+                        particles->SetRotation(-pi_over_two);
+						particle_systems_.push_back(particles);
+						game_objects_.insert(game_objects_.begin() + 1, exp_);
+					    // Remove the projectile from the game world
+                        game_objects_.erase(game_objects_.begin() + i + 1);
+                        delete current_game_object;
+                        exp_->timer->Start(1);
+						particles->timer->Start(1);
+					}
                     break;
+                }
+            }
+            else if (exp && !exp->IsDamaged(other_game_object) && (enemy || player == other_game_object)) {
+				float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
+				// Check if the object is within the explosion radius
+                if (distance <= exp->GetRadius()) {
+					// Add the object to the set of affected objects
+					exp->AddAffectedObject(other_game_object);
+                    // If the object is within the explosion radius, deal damage to the object
+                    int damage = std::ceil(exp->GetDamageAt(distance));
+                    for (int i = 0; i < damage; i++) {
+                        other_game_object->hurt();
+                        if(other_game_object->isDying())
+							break;
+                    }
                 }
             }
         }
     }
+	// Update all particle systems
+	for (int i = 0; i < particle_systems_.size(); i++) {
+		ParticleSystem* particles = dynamic_cast<ParticleSystem*>(particle_systems_[i]);
+		if (particles->timer->Finished()) {
+			particle_systems_.erase(particle_systems_.begin() + i);
+			delete particles;
+		}
+	}
 }
 
 
@@ -321,12 +360,12 @@ void Game::Render(void){
 
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
-        if (i == 0) {
-            dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(1)->Render(view_matrix, current_time_);
-            dynamic_cast<PlayerGameObject*>(game_objects_[0])->getComponent(0)->Render(view_matrix, current_time_);
-        }
         game_objects_[i]->Render(view_matrix, current_time_);
     }
+	// Render all particle systems
+	for (int i = 0; i < particle_systems_.size(); i++) {
+		particle_systems_[i]->Render(view_matrix, current_time_);
+	}
 }
 
 
@@ -339,9 +378,9 @@ void Game::MainLoop(void)
     while (!glfwWindowShouldClose(window_)){
 
         // Calculate delta time
-        double current_time = glfwGetTime();
-        double delta_time = current_time - last_time;
-        last_time = current_time;
+        current_time_ = glfwGetTime();
+        double delta_time = current_time_ - last_time;
+        last_time = current_time_;
 
         // Update window events like input handling
         glfwPollEvents();
@@ -414,7 +453,7 @@ void Game::Init(void)
     sprite_shader_.Init((resources_directory_g+std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/sprite_fragment_shader.glsl")).c_str());
 
     // Initialize particle shader
-    particle_shader_.Init((resources_directory_g + std::string("/particle_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
+    explosion_shader_.Init((resources_directory_g + std::string("/explosion_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/explosion_fragment_shader.glsl")).c_str());
 
     // Initialize time
     current_time_ = 0.0;
@@ -428,6 +467,7 @@ Game::~Game()
 
     // Free rendering resources
     delete sprite_;
+    delete particles_;
 
     // Close window
     glfwDestroyWindow(window_);

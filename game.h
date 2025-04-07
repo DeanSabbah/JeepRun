@@ -46,8 +46,8 @@ namespace game {
             // Shader for rendering sprites in the scene
             Shader sprite_shader_;
             
-            // Shader for rendering particles
-            Shader particle_shader_;
+            // Shader for rendering explosions
+            Shader explosion_shader_;
 
             // References to textures
             // This needs to be a pointer
@@ -55,6 +55,7 @@ namespace game {
 
             // List of game objects
             std::vector<GameObject*> game_objects_;
+			std::vector<GameObject*> particle_systems_;
 
             // Keep track of time
             double current_time_;

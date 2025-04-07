@@ -64,7 +64,7 @@ namespace game {
 
 
         protected:
-            int health;
+            int health = -1;
             // Bool to make sure the player is not hurt when they collide with a dying object
             bool _dying = false;
             void die();
