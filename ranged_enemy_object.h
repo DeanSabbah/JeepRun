@@ -10,12 +10,14 @@ namespace game {
         // Constructor
         RangedEnemyObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius);
         void Update(double delta_time) override;
-        // Collision functions
-        bool circleCollision(ColliderObject* other) const override;
-        bool rayCollision(ColliderObject* other) const override;
+        void updatePlayerPos(glm::vec3 player_pos) override;
+        Timer* getShootTimer();
+        
     private:
 
-        const float speed_ = 380.0f;
+        Timer *t_;
+        Timer *shoot_timer_;
+        const float speed_ = 0.2f;
     };
 }
 

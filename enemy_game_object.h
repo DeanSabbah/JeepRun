@@ -13,14 +13,16 @@ namespace game {
 			// Destructor
 			~EnemyGameObject();
 			void Update(double delta_time) override;
-			void updatePlayerPos(glm::vec3 player_pos);
+			virtual void updatePlayerPos(glm::vec3 player_pos);
 			void setState(bool state);
 			bool getState() const;
 			float getSpeed() const;
+			glm::vec3 getPLayerPos() const;
+			glm::vec3 getVelocity() const;
 			// Collision functions
 			bool circleCollision(ColliderObject* other) const override;
 			bool rayCollision(ColliderObject* other) const override;
-		private:
+		protected:
 			// Object's velcity
 			glm::vec3 velocity_;
 			// Object's speed

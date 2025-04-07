@@ -11,13 +11,10 @@ namespace game {
         WanderingEnemyObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius);
         void Update(double delta_time) override;
         // Collision functions
-        bool circleCollision(ColliderObject* other) const override;
-        bool rayCollision(ColliderObject* other) const override;
     private:
 
-        Timer t_;
-        glm::vec3 dir;
-        const float speed_ = 400.0f;
+        Timer* t_;
+        const float speed_ = 0.2f;
     };
 }
 

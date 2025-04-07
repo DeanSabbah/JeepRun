@@ -16,6 +16,7 @@ set(HDRS
     ranged_enemy_object.h
     kamikaze_enemy_object.h
     projectile_game_object.h
+    enemy_projectile_object.h
     bullet_projectile.h
     missile_projectile.h
     shader.h
@@ -43,6 +44,7 @@ set(SRCS
     ranged_enemy_object.cpp
     kamikaze_enemy_object.cpp
     projectile_game_object.cpp
+    enemy_projectile_object.cpp
     bullet_projectile.cpp
     missile_projectile.cpp
     shader.cpp
