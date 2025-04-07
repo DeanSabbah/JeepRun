@@ -59,7 +59,8 @@ void Game::SetupGameWorld(void)
            invincible = 7,
            fireball = 8,
            bullet = 9,
-           missile = 10};
+           missile = 10,
+           nothing = 11};
     textures.push_back("/textures/Ship_4.png"); 
     textures.push_back("/textures/Ship_2.png"); 
     textures.push_back("/textures/Ship_5.png");
@@ -71,6 +72,7 @@ void Game::SetupGameWorld(void)
 	textures.push_back("/textures/FireBall.png");
 	textures.push_back("/textures/bullet.png");
 	textures.push_back("/textures/roc.png");
+	textures.push_back("/textures/nothing.png");
     // Load textures
     LoadTextures(textures);
 
@@ -207,7 +209,8 @@ void Game::Update(double delta_time)
         GameObject* current_game_object = game_objects_[i];
 		    // Evaluate if the current game object is a projectile object
         ProjectileGameObject* projectile_curr = dynamic_cast<ProjectileGameObject*>(current_game_object);
-        MissileProjectile* miss = dynamic_cast<MissileProjectile*>(current_game_object);
+		// Evaluate if the current game object is an explosion object
+		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);
         // Evaluate if the current game object is a ranged enemy object
         RangedEnemyObject* ranged_enemy_curr = dynamic_cast<RangedEnemyObject*>(current_game_object);
         // Update the current game object
@@ -292,6 +295,7 @@ void Game::Update(double delta_time)
 				//check if enemy is colliding with projectile
                 if (enemy && projectile_curr->collide(enemy) && !enemy->isDying()) {
 					BulletProjectile* bull = dynamic_cast<BulletProjectile*>(current_game_object);
+                    MissileProjectile* miss = dynamic_cast<MissileProjectile*>(current_game_object);
 					if (bull) {
 						// If the object is a bullet projectile, deal damage to the enemy
 						enemy->hurt();
@@ -302,7 +306,7 @@ void Game::Update(double delta_time)
 					else if (miss) {
                         float pi_over_two = glm::pi<float>() / 2.0f;
 						// If the object is a missile projectile, create an explosion
-						Explosion * exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &explosion_shader_, NULL, glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
+						Explosion * exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[11], glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
                         GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[4], exp_);
                         particles->SetScale(glm::vec2(0.2));
                         particles->SetRotation(-pi_over_two);

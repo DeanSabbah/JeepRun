@@ -26,3 +26,6 @@ SOURCES:
 
 	Custom Missiles: https://opengameart.org/content/custom-missiles
 	Licence: CC-BY 3.0
+
+	HD transparent picture.png: https://commons.wikimedia.org/wiki/File:HD_transparent_picture.png
+	Licence: Creative Commons Attribution-Share Alike 4.0 International: https://creativecommons.org/licenses/by-sa/4.0/deed.en

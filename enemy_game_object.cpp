@@ -5,6 +5,11 @@
 
 using namespace game;
 
+enum states_ {
+	Patrol = 0,
+	Intercept = 1
+};
+
 EnemyGameObject::EnemyGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius) : GameObject(position, geom, shader, texture, scale), ColliderObject(radius) {
 	// random height and width for the patrol area
 	height_ = (rand() % 20 - 10) / 10.0f;

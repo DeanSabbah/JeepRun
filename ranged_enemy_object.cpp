@@ -8,6 +8,7 @@ using namespace game;
 
 RangedEnemyObject::RangedEnemyObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius)
 	: EnemyGameObject(position, geom, shader, texture, scale, radius) {
+	shoot_timer_ = new Timer();
 	t_ = new Timer();
 	t_->Start(3);
 	state_ = false;
@@ -19,6 +20,12 @@ RangedEnemyObject::RangedEnemyObject(const glm::vec3& position, Geometry* geom, 
 	float num2 = distrib(gen);
 
 	velocity_ = glm::normalize(glm::vec3(num1, num2, 0));
+}
+
+RangedEnemyObject::~RangedEnemyObject() {
+	delete t_;
+	delete shoot_timer_;
+	EnemyGameObject::~EnemyGameObject();
 }
 
 void RangedEnemyObject::Update(double delta_time) {

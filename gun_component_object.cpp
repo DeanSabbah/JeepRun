@@ -16,8 +16,10 @@ void GunComponent::setState(const int s) {
 	switch (state_) {
 		case 0:
 			fire_rate_ = 0.2f;
+			setTexture(10);
 			break;
 		case 1:
+			setTexture(11);
 			fire_rate_ = 1.2f;
 			break;
 	}
