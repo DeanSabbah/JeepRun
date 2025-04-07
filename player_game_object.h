@@ -24,6 +24,7 @@ namespace game {
             ~PlayerGameObject();
 
             void Update(double delta_time) override;
+			void Render(glm::mat4 view_matrix, double current_time) override;
 			// Function to collect objects
             void collect(const int type);
 			// Returns if the player is invincible

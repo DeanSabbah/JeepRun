@@ -8,7 +8,7 @@
 namespace game {
 
     ParticleSystem::ParticleSystem(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, GameObject* parent)
-        : GameObject(position, geom, shader, texture, glm::vec2(1.0f)) {
+        : GameObject(position, geom, shader, texture, glm::vec2(0.2)) {
 
         parent_ = parent;
         creation_time_ = glfwGetTime();
@@ -51,7 +51,7 @@ namespace game {
         shader_->SetUniformMat4("transformation_matrix", transformation_matrix);
 
         // Set the time in the shader
-        shader_->SetUniform1f("time", current_time - creation_time_);
+        shader_->SetUniform1f("time", current_time - creation_time_ + 0.5);
 
         // Set up the geometry
         geometry_->SetGeometry(shader_->GetShaderProgram());
