@@ -52,7 +52,7 @@ namespace game {
                 // Se above for definition of rand_num()
                 //
                 // Opening of the stream of particles
-                theta = rand_num() * pi;
+                theta = (rand_num() * pi) + (pi / 2);
                 //theta = two_pi * rand_num();
                 // Radius (length) of the stream
                 r = 0.5f + 0.5f * rand_num();

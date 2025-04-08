@@ -52,6 +52,7 @@ void EnemyGameObject::updatePlayerPos(glm::vec3 player_pos) {
 	player_pos_ = player_pos;
 	distance_ = glm::distance(player_pos_, position_);
 	determineState();
+	speed_ = 420.0f
 }
 
 // Set the state of the enemy object

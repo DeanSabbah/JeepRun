@@ -4,7 +4,7 @@
 #include "enemy_game_object.h"
 #include "timer.h"
 
-enum States_ {
+enum states_ {
 	Follow = 0,
 	Retreat = 1,
 	Patrol = 2,
