@@ -88,7 +88,7 @@ namespace game {
 					velocity_ += acceleration_;
 				break;
 			case 1:// Backward
-				if (velocity_ > -max_velocity_ / 2.0f)
+				if (velocity_ > -max_velocity_ / 1.5f)
 					velocity_ -= acceleration_;
 				break;
 		}
