@@ -31,6 +31,7 @@ set(HDRS
     particle_system.h
     blood_particles.h
     explosion.h
+    blood.h
 )
  
 set(SRCS

@@ -22,6 +22,7 @@
 #include "blood_particles.h"
 #include "particle_system.h"
 #include "explosion.h"
+#include "blood.h"
 
 namespace game {
 
@@ -84,14 +85,14 @@ void Game::SetupGameWorld(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.6f, window_));
+    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.4f, window_));
     float pi_over_two = glm::pi<float>() / 2.0f;
     game_objects_[0]->SetRotation(pi_over_two);
 
     // Setup other objects
-    game_objects_.push_back(new RangedEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.5f));
+    game_objects_.push_back(new RangedEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.4f));
     game_objects_[1]->SetRotation(pi_over_two);
-    game_objects_.push_back(new RangedEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.5f));
+    game_objects_.push_back(new RangedEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.4f));
     game_objects_[2]->SetRotation(pi_over_two);
 	// Setup collectible objects in random locations
 	for (int i = 0; i < 90; i++) {
@@ -111,11 +112,6 @@ void Game::SetupGameWorld(void)
 			game_objects_.push_back(background);
         }
     }
-
-    /*GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[tex_orb], game_objects_[0]);
-    particles->SetScale(glm::vec2(0.2));
-    particles->SetRotation(-pi_over_two);
-    game_objects_.push_back(particles);*/
 
 	spawn_timer = new Timer();
 }
@@ -290,6 +286,8 @@ void Game::Update(double delta_time)
             ColliderObject* collider = dynamic_cast<ColliderObject*>(other_game_object);
 			// Evaluate if other game object is a collectible object
 			CollectibleGameObject* collectible = dynamic_cast<CollectibleGameObject*>(other_game_object);
+			// Evaluate if other game object is an explosion
+			Explosion* exp_other = dynamic_cast<Explosion*>(other_game_object);
             // Compute distance between object i and object j
             float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
             if (current_game_object == player) {
@@ -310,12 +308,6 @@ void Game::Update(double delta_time)
                             // Only damage player if they are not invincible
                             if (!player->is_invincible()) {
                                 current_game_object->hurt();
-                                // Add blood particles
-								GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &blood_shader_, tex_[12], player);
-                                particles->SetScale(glm::vec2(100.0f));
-                                particles->SetRotation(-pi_over_two);
-                                particle_systems_.push_back(particles);
-                                particles->timer->Start(1);
                             }
 						}
                     }
@@ -336,8 +328,17 @@ void Game::Update(double delta_time)
 					if (bull) {
 						// If the object is a bullet projectile, deal damage to the enemy
 						enemy->hurt();
+                        // Add blood particles
+                        GameObject* blood = new Blood(projectile_curr->GetPosition(), sprite_, &sprite_shader_);
+                        blood->SetRotation(projectile_curr->GetRotation() + glm::pi<float>());
+                        game_objects_.insert(game_objects_.begin() + 1, blood);
+                        GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &explosion_shader_, tex_[12], blood);
+                        particles->SetScale(glm::vec2(0.05f));
+                        particles->SetRotation(-pi_over_two);
+                        particle_systems_.push_back(particles);
+                        particles->timer->Start(1);
                         // Remove the projectile from the game world
-					    game_objects_.erase(game_objects_.begin() + i);
+					    game_objects_.erase(game_objects_.begin() + i + 1);
 					    delete current_game_object;
 					}
 					else if (miss) {
@@ -361,19 +362,13 @@ void Game::Update(double delta_time)
                 if (ranged_enemy_proj->collide(player) && !player->isDying()) {
 					// If the object is a ranged enemy projectile, deal damage to the player
 					player->hurt();
-                    // Add blood particles
-                    GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &blood_shader_, tex_[12], player);
-                    particles->SetScale(glm::vec2(0.2f));
-                    particles->SetRotation(-pi_over_two);
-                    particle_systems_.push_back(particles);
-                    particles->timer->Start(1);
 					// Remove the projectile from the game world
 					game_objects_.erase(game_objects_.begin() + i);
 					delete current_game_object;
                     break;
                 }
             }
-            else if (exp && !exp->IsDamaged(other_game_object) && (enemy || player == other_game_object)) {
+            if (exp && enemy && !exp->IsDamaged(other_game_object)) {
 				float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
 				// Check if the object is within the explosion radius
                 if (distance <= exp->GetRadius()) {
@@ -385,6 +380,21 @@ void Game::Update(double delta_time)
                         other_game_object->hurt();
                         if(other_game_object->isDying())
 							break;
+                    }
+                }
+            }
+            else if (current_game_object == player && exp_other && !exp_other->IsDamaged(player)){
+				float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
+				// Check if the object is within the explosion radius
+                if (distance <= exp_other->GetRadius()) {
+					// Add the object to the set of affected objects
+					exp_other->AddAffectedObject(player);
+					// If the object is within the explosion radius, deal damage to the object
+					int damage = std::ceil(exp_other->GetDamageAt(distance));
+                    for (int i = 0; i < damage; i++) {
+                        player->hurt();
+                        if (player->isDying())
+                            break;
                     }
                 }
             }
