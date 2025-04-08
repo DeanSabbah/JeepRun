@@ -57,7 +57,7 @@ namespace game {
 			// Turret Component
 			TurretComponent* turret_component_;
 			// Maximum velocity of the player
-			const float max_velocity_ = 2.0f;
+			const float max_velocity_ = 3.0f;
 			// Acceleration of the player
 			const float acceleration_ = 0.05f;
 			// Velocity of the player

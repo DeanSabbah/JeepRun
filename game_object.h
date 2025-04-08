@@ -54,6 +54,7 @@ namespace game {
 			void setGhostMode(bool ghost) { ghost_ = ghost; }
 
             void hurt();
+            void heal();
 			bool isDying() const { return _dying; }
             GameObject* prev_collider;
 			Timer* timer;

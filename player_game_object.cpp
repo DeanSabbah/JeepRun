@@ -64,7 +64,7 @@ namespace game {
 		
 		switch (type) {
 			case 0:
-				// Add health
+				heal();
 				break;
 			case 1:
 				gun_component_->addAmmo();
@@ -83,14 +83,14 @@ namespace game {
 	// case 0 = forward, 1 = backwards, 2 = right, 3 = left
 	void PlayerGameObject::update_velocity(int direction) {
 		switch (direction) {
-			case 0:// Forward
-				if (velocity_ < max_velocity_)
-					velocity_ += acceleration_;
-				break;
-			case 1:// Backward
-				if (velocity_ > -max_velocity_ / 1.5f)
-					velocity_ -= acceleration_;
-				break;
+		case 0:// Forward
+			if (velocity_ < max_velocity_)
+				velocity_ += acceleration_;
+			break;
+		case 1:// Backward
+			if (velocity_ > -max_velocity_ / 2.0f)
+				velocity_ -= acceleration_;
+			break;
 		}
 	}
 
