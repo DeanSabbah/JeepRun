@@ -62,7 +62,7 @@ set(SRCS
     sprite_fragment_shader.glsl
     explosion_vertex_shader.glsl
     particle_fragment_shader.glsl
-    blood_vertex_shader.glslz
+    blood_vertex_shader.glsl
 )
 
 # Add path name to configuration file

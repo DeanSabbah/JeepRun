@@ -55,11 +55,11 @@ namespace game {
 			// Turret Component
 			TurretComponent* turret_component_;
 			// Maximum velocity of the player
-			const float max_velocity_ = 2.0f;
+			const float max_velocity_ = 3.0f;
 			// Acceleration of the player
 			const float acceleration_ = 0.05f;
 			// Velocity of the player
-			glm::vec3 velocity_ = glm::vec3(0.0f, 0.0f, 0.0f);
+			float velocity_ = 0.0f;
 			// Number of objects needed to collect to become invincible
 			const int objs_needed = 10;
 			// Number of objects collected

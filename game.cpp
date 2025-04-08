@@ -171,17 +171,18 @@ void Game::HandleControls(double delta_time)
 			player->update_velocity(1);
         }
         if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
-            player->SetRotation(angle - angle_increment);
+            player->SetRotation(angle - (angle_increment * std::min(player->get_velocity(), 1.0f)));
+            
         }
         if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
-            player->SetRotation(angle + angle_increment);
+            player->SetRotation(angle + (angle_increment * std::min(player->get_velocity(), 1.0f)));
         }
-        if (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) {
+        /*if (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) {
             player->update_velocity(3);
         }
         if (glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS) {
             player->update_velocity(2);
-        }
+        }*/
         if (glfwGetKey(window_, GLFW_KEY_1) == GLFW_PRESS) {
 			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
 			gun->setState(0);

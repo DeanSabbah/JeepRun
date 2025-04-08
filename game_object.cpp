@@ -104,6 +104,10 @@ void GameObject::hurt() {
     }
 }
 
+void GameObject::heal() {
+    health++;
+}
+
 // Plays the explosion animation and starts timer
 void GameObject::die() {
     _dying = true;
