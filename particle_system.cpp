@@ -53,6 +53,11 @@ namespace game {
         // Set the time in the shader
         shader_->SetUniform1f("time", current_time - creation_time_ + 0.5);
 
+		float rand_num = ((float)rand()) / ((float)RAND_MAX);
+		rand_num = (rand_num * 2.0f) - 1.0f;
+
+        shader_->SetUniform1f("a", rand_num);
+
         // Set up the geometry
         geometry_->SetGeometry(shader_->GetShaderProgram());
 

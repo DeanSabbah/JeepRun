@@ -19,6 +19,7 @@
 #include "enemy_projectile_object.h"
 #include "game.h"
 #include "particles.h"
+#include "blood_particles.h"
 #include "particle_system.h"
 #include "explosion.h"
 
@@ -60,7 +61,8 @@ void Game::SetupGameWorld(void)
            fireball = 8,
            bullet = 9,
            missile = 10,
-           nothing = 11};
+           nothing = 11,
+           square = 12};
     textures.push_back("/textures/Ship_4.png"); 
     textures.push_back("/textures/Ship_2.png"); 
     textures.push_back("/textures/Ship_5.png");
@@ -73,6 +75,7 @@ void Game::SetupGameWorld(void)
 	textures.push_back("/textures/bullet.png");
 	textures.push_back("/textures/roc.png");
 	textures.push_back("/textures/nothing.png");
+	textures.push_back("/textures/square.png");
     // Load textures
     LoadTextures(textures);
 
@@ -197,6 +200,7 @@ void Game::HandleControls(double delta_time)
 
 void Game::Update(double delta_time)
 {
+    float pi_over_two = glm::pi<float>() / 2.0f;
 	// If spawn timer is finished, spawn a new object in random location
     if (spawn_timer->Finished() || !spawn_timer->Running()) {
         SpawnObject();
@@ -214,6 +218,27 @@ void Game::Update(double delta_time)
 		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);
         // Evaluate if the current game object is a ranged enemy object
         RangedEnemyObject* ranged_enemy_curr = dynamic_cast<RangedEnemyObject*>(current_game_object);
+        // Check if the object is dying
+        if (current_game_object->isDying()) {
+            // If the object is dying, check if the timer has finished
+            if (current_game_object->timer->Finished()) {
+                // If player dies, comment "Game over" and close the window
+                if (current_game_object == player) {
+                    std::cout << "Game over" << std::endl;
+                    glfwSetWindowShouldClose(window_, true);
+                    return;
+                }
+                // If the timer has finished, remove the object from the game world
+                game_objects_.erase(game_objects_.begin() + i);
+                // Deletes dead object from memory
+                delete current_game_object;
+                // Makes sure that we don't call the deleted object by skipping the rest of the loop
+                continue;
+            }
+            if (current_game_object == player)
+                return;
+        }
+
         // Update the current game object
         current_game_object->Update(delta_time);
         // Projectile handling
@@ -253,25 +278,6 @@ void Game::Update(double delta_time)
                 }
             }
         }
-            
-		// Check if the object is dying
-        else if (current_game_object->isDying()) {
-            // If the object is dying, check if the timer has finished
-            if (current_game_object->timer->Finished()) {
-				// If player dies, comment "Game over" and close the window
-                if (current_game_object == player) {
-                    std::cout << "Game over" << std::endl;
-                    glfwSetWindowShouldClose(window_, true);
-                    return;
-                }
-				// If the timer has finished, remove the object from the game world
-                game_objects_.erase(game_objects_.begin() + i);
-                // Deletes dead object from memory
-                delete current_game_object;
-                // Makes sure that we don't call the deleted object by skipping the rest of the loop
-                continue;
-            }
-        }
 
         // Check for collision with other game objects
         // Note the loop bounds: we avoid testing the last 9 objects since
@@ -302,8 +308,15 @@ void Game::Update(double delta_time)
 							current_game_object->prev_collider = other_game_object;
 							other_game_object->hurt();
                             // Only damage player if they are not invincible
-                            if (!player->is_invincible())
-    							current_game_object->hurt();
+                            if (!player->is_invincible()) {
+                                current_game_object->hurt();
+                                // Add blood particles
+								GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &blood_shader_, tex_[12], player);
+                                particles->SetScale(glm::vec2(100.0f));
+                                particles->SetRotation(-pi_over_two);
+                                particle_systems_.push_back(particles);
+                                particles->timer->Start(1);
+                            }
 						}
                     }
                 }
@@ -328,11 +341,10 @@ void Game::Update(double delta_time)
 					    delete current_game_object;
 					}
 					else if (miss) {
-                        float pi_over_two = glm::pi<float>() / 2.0f;
 						// If the object is a missile projectile, create an explosion
 						Explosion * exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[11], glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
                         GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[4], exp_);
-                        particles->SetScale(glm::vec2(0.2));
+                        particles->SetScale(glm::vec2(0.2f));
                         particles->SetRotation(-pi_over_two);
 						particle_systems_.push_back(particles);
 						game_objects_.insert(game_objects_.begin() + 1, exp_);
@@ -349,6 +361,12 @@ void Game::Update(double delta_time)
                 if (ranged_enemy_proj->collide(player) && !player->isDying()) {
 					// If the object is a ranged enemy projectile, deal damage to the player
 					player->hurt();
+                    // Add blood particles
+                    GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &blood_shader_, tex_[12], player);
+                    particles->SetScale(glm::vec2(0.2f));
+                    particles->SetRotation(-pi_over_two);
+                    particle_systems_.push_back(particles);
+                    particles->timer->Start(1);
 					// Remove the projectile from the game world
 					game_objects_.erase(game_objects_.begin() + i);
 					delete current_game_object;
@@ -500,11 +518,18 @@ void Game::Init(void)
     particles_temp->CreateGeometry(4000); // Use 4000 particles
     particles_ = particles_temp;
 
+	// Initialize blood particle geometry
+	BloodParticles* blood_temp = new BloodParticles();
+	blood_temp->CreateGeometry(64); // Use 64 particles
+	blood_particles_ = blood_temp;
+
     // Initialize sprite shader
     sprite_shader_.Init((resources_directory_g+std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/sprite_fragment_shader.glsl")).c_str());
-
     // Initialize particle shader
-    explosion_shader_.Init((resources_directory_g + std::string("/explosion_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/explosion_fragment_shader.glsl")).c_str());
+    explosion_shader_.Init((resources_directory_g + std::string("/explosion_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
+
+	// Initialize blood shader
+	blood_shader_.Init((resources_directory_g + std::string("/blood_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
 
     // Initialize time
     current_time_ = 0.0;
@@ -519,6 +544,7 @@ Game::~Game()
     // Free rendering resources
     delete sprite_;
     delete particles_;
+	delete blood_particles_;
 
     // Close window
     glfwDestroyWindow(window_);

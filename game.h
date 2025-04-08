@@ -43,11 +43,17 @@ namespace game {
             // Particle geometry
             Geometry* particles_;
 
+			// Blood particle geometry
+			Geometry* blood_particles_;
+
             // Shader for rendering sprites in the scene
             Shader sprite_shader_;
             
-            // Shader for rendering explosions
+			// Shader for rendering explosions particles
             Shader explosion_shader_;
+
+			// Shader for rendering blood particles
+			Shader blood_shader_;
 
             // References to textures
             // This needs to be a pointer

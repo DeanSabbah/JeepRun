@@ -2,29 +2,18 @@
 #include <string>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "particles.h"
+#include "blood_particles.h"
 
 namespace game {
 
-    Particles::Particles(void) : Geometry()
+    BloodParticles::BloodParticles(void)
     {
-        // Initialize variables with default values
-        vbo_ = 0;
-        ebo_ = 0;
-        size_ = 0;
+        Particles::Particles();
     }
+    // Create the geometry (called once)
 
-
-    // Auxiliary function for generating a random number between 0 and 1
-    float Particles::rand_num(void)
+    void BloodParticles::CreateGeometry(int num_particles)
     {
-        return ((float)rand()) / ((float)RAND_MAX);
-    }
-
-
-    void Particles::CreateGeometry(int num_particles)
-    {
-
         // Each particle is a square with four vertices and two triangles
 
         // Number of attributes for vertices and faces
@@ -63,10 +52,10 @@ namespace game {
                 // Se above for definition of rand_num()
                 //
                 // Opening of the stream of particles
-                //theta = (2.0*rand_num() -1.0f)*0.13f + pi;
-                theta = two_pi * rand_num();
+                theta = rand_num() * pi;
+                //theta = two_pi * rand_num();
                 // Radius (length) of the stream
-                r = 0.0f + 0.8 * rand_num();
+                r = 0.5f + 0.5f * rand_num();
                 // Time phase
                 tmod = rand_num();
             }
@@ -111,42 +100,9 @@ namespace game {
         size_ = num_face_elements;
 
         // Free memory used
-        delete [] particles;
-        delete [] manyfaces;
+        delete[] particles;
+        delete[] manyfaces;
     }
 
-
-    void Particles::SetGeometry(GLuint shader_program) {
-
-        // Set blending
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-
-        // Bind buffers
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-
-        // Set attributes for shaders
-        // Should be consistent with how we created the buffers for the particle elements
-        GLint vertex_att = glGetAttribLocation(shader_program, "vertex");
-        glVertexAttribPointer(vertex_att, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), 0);
-        glEnableVertexAttribArray(vertex_att);
-
-        // Direction
-        GLint dir_att = glGetAttribLocation(shader_program, "dir");
-        glVertexAttribPointer(dir_att, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
-        glEnableVertexAttribArray(dir_att);
-
-        // Phase 
-        GLint time_att = glGetAttribLocation(shader_program, "t");
-        glVertexAttribPointer(time_att, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(4 * sizeof(GLfloat)));
-        glEnableVertexAttribArray(time_att);
-
-        // Texture coordinates
-        GLint tex_att = glGetAttribLocation(shader_program, "uv");
-        glVertexAttribPointer(tex_att, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void*)(5 * sizeof(GLfloat)));
-        glEnableVertexAttribArray(tex_att);
-    }
 
 } // namespace game

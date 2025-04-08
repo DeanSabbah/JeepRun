@@ -29,6 +29,7 @@ set(HDRS
     turret_component_object.h
     particles.h
     particle_system.h
+    blood_particles.h
     explosion.h
 )
  
@@ -55,13 +56,13 @@ set(SRCS
     turret_component_object.cpp
     particles.cpp
     particle_system.cpp
+    blood_particles.cpp
     explosion.cpp
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     explosion_vertex_shader.glsl
-    explosion_fragment_shader.glsl
+    particle_fragment_shader.glsl
     blood_vertex_shader.glsl
-    blood_fragment_shader.glsl
 )
 
 # Add path name to configuration file
