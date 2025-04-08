@@ -58,26 +58,30 @@ void Game::SetupGameWorld(void)
            tex_stars = 3,
            tex_orb = 4,
            explosion = 5,
-           yellow_orb = 6,
-           invincible = 7,
-           fireball = 8,
-           bullet = 9,
-           missile = 10,
-           nothing = 11,
-           square = 12};
+           invincible = 6,
+           fireball = 7,
+           bullet = 8,
+           missile = 9,
+           nothing = 10,
+           square = 11,
+           health = 12,
+           bullet_ammo = 13,
+           yellow_orb = 14 };
     textures.push_back("/textures/Ship_4.png"); 
     textures.push_back("/textures/Ship_2.png"); 
     textures.push_back("/textures/Ship_5.png");
     textures.push_back("/textures/stars.png");
     textures.push_back("/textures/orb.png");
     textures.push_back("/textures/Explosion.png");
-    textures.push_back("/textures/orb_yellow.png");
 	textures.push_back("/textures/Player_invincible.png");
 	textures.push_back("/textures/FireBall.png");
 	textures.push_back("/textures/bullet.png");
 	textures.push_back("/textures/roc.png");
 	textures.push_back("/textures/nothing.png");
 	textures.push_back("/textures/square.png");
+    textures.push_back("/textures/health-red 32px.png");
+    textures.push_back("/textures/ammo-rilfe 32px.png");
+    textures.push_back("/textures/orb_yellow.png");
     // Load textures
     LoadTextures(textures);
 
@@ -97,9 +101,21 @@ void Game::SetupGameWorld(void)
     game_objects_[2]->SetRotation(pi_over_two);
 	// Setup collectible objects in random locations
 	for (int i = 0; i < 90; i++) {
+        // Generate number from 0 to 9
+		int type = rand() % 10;
+		if (type == 0) {
+			type = 0;
+		}
+        else if (type >= 1 && type <= 5) {
+			type = 1;
+        }
+        else {
+			type = 2;
+        }
+
 		float x = (rand() % 34) - 17;
 		float y = (rand() % 34) - 17;
-		game_objects_.push_back(new CollectibleGameObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[yellow_orb], glm::vec2(1.0f, 1.0f), 0.3f));
+		game_objects_.push_back(new CollectibleGameObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[type + 12], glm::vec2(1.0f, 1.0f), type, 0.3f));
 		game_objects_[3 + i]->SetRotation(pi_over_two);
 	}
 
@@ -176,13 +192,13 @@ void Game::HandleControls(double delta_time)
         }
 		if (glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
-            if (!gun->cooling_down()) {
+            if (!gun->cooling_down() && gun->hasAmmo()) {
 				switch(gun->getState()) {
 					case 0:
-                        game_objects_.insert(game_objects_.begin() + 1, new BulletProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 10, glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+                        game_objects_.insert(game_objects_.begin() + 1, new BulletProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, tex_[8], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
 						break;
 					case 1:
-						game_objects_.insert(game_objects_.begin() + 1, new MissileProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, 11, glm::vec2(0.8, 0.5), 5.0f, 1, 5.0f, 0.2f));
+						game_objects_.insert(game_objects_.begin() + 1, new MissileProjectile(gun->GetPosition(), gun->GetBearing(), sprite_, &sprite_shader_, tex_[9], glm::vec2(0.8, 0.5), 5.0f, 1, 5.0f, 0.2f));
 						break;
 				}
                 player->shoot_projectile();
@@ -228,7 +244,7 @@ void Game::Update(double delta_time)
                     return;
                 }
                 if (kamikaze_enemy_curr) {
-                    Explosion* exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[11], glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
+                    Explosion* exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[10], glm::vec2(1.0f, 1.0f), 10.0f, 1.5);
                     GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[4], exp_);
                     particles->SetScale(glm::vec2(0.2f));
                     particles->SetRotation(-pi_over_two);
@@ -356,7 +372,7 @@ void Game::Update(double delta_time)
                         GameObject* blood = new Blood(projectile_curr->GetPosition(), sprite_, &sprite_shader_);
                         blood->SetRotation(projectile_curr->GetRotation() + glm::pi<float>());
                         game_objects_.insert(game_objects_.begin() + 1, blood);
-                        GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &explosion_shader_, tex_[12], blood);
+                        GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &explosion_shader_, tex_[10], blood);
                         particles->SetScale(glm::vec2(0.05f));
                         particles->SetRotation(-pi_over_two);
                         particle_systems_.push_back(particles);
@@ -367,7 +383,7 @@ void Game::Update(double delta_time)
 					}
 					else if (miss) {
 						// If the object is a missile projectile, create an explosion
-						Explosion * exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[11], glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
+						Explosion * exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[10], glm::vec2(1.0f, 1.0f), 10.0f, 1.5);
                         GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[4], exp_);
                         particles->SetScale(glm::vec2(0.2f));
                         particles->SetRotation(-pi_over_two);
@@ -392,7 +408,7 @@ void Game::Update(double delta_time)
                     break;
                 }
             }
-            if (exp && enemy && !exp && !exp->IsDamaged(other_game_object)) {
+            if (exp && enemy && !exp_other && !exp->IsDamaged(other_game_object)) {
 				float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
 				// Check if the object is within the explosion radius
                 if (distance <= exp->GetRadius()) {
@@ -400,6 +416,7 @@ void Game::Update(double delta_time)
 					exp->AddAffectedObject(other_game_object);
                     // If the object is within the explosion radius, deal damage to the object
                     int damage = std::ceil(exp->GetDamageAt(distance));
+					std::cout << "Damage against enemy: " << damage << std::endl;
                     for (int i = 0; i < damage; i++) {
                         other_game_object->hurt();
                         if(other_game_object->isDying())
@@ -415,6 +432,7 @@ void Game::Update(double delta_time)
 					exp_other->AddAffectedObject(player);
 					// If the object is within the explosion radius, deal damage to the object
 					int damage = std::ceil(exp_other->GetDamageAt(distance));
+					std::cout << "Damage against player: " << damage << std::endl;
                     for (int i = 0; i < damage; i++) {
                         player->hurt();
                         if (player->isDying())
@@ -647,7 +665,7 @@ void Game::SpawnObject() {
 	// Add the new object to the game world
 	game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_object);
 	// Restart the spawn timer
-	spawn_timer->Start(10);
+	spawn_timer->Start(2.0f);
 }
 
 } // namespace game

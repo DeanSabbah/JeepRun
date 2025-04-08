@@ -44,14 +44,16 @@ namespace game {
 			void set_velocity(float velocity);
 			// Shoots a projectile
 			void shoot_projectile();
-			// Returns cooldown status
-			bool cooling_down() { return !cooldown->Finished(); }
 			// Collision functions
 			bool circleCollision(ColliderObject* other) const override;
 			bool rayCollision(ColliderObject* other) const override;
 			
 
         private:
+			// Gun Component
+			GunComponent* gun_component_;
+			// Turret Component
+			TurretComponent* turret_component_;
 			// Maximum velocity of the player
 			const float max_velocity_ = 2.0f;
 			// Acceleration of the player
@@ -63,11 +65,9 @@ namespace game {
 			// Number of objects collected
 			int collected_objs = 0;
 			// Amount of time the player is invincible
-			const float invincibility_time = 10.0f;
+			const float invincibility_time = 5.0f;
 			// Bool to check if the player is invincible
             bool invincible_= false;
-			// Cooldown Timer
-			Timer* cooldown;
 			// Components
 			// 0 = turret, 1 = gun
 			std::vector<ComponentGameObject*> components_;

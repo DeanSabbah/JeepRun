@@ -8,14 +8,14 @@
 namespace game {
     class CollectibleGameObject : public GameObject, public ColliderObject {
 	public:
-		CollectibleGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius);
+		CollectibleGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const int type, const float radius);
 		~CollectibleGameObject();
 		void Update(double delta_time) override;
 		bool rayCollision(ColliderObject* other) const override;
 		bool circleCollision(ColliderObject* other) const override;
-		inline int getType() const { return type; };
+		inline int getType() const { return type_; };
 	private:
-		int type;
+		int type_;
     };
 }
 

@@ -11,11 +11,11 @@ namespace game {
 	PlayerGameObject::PlayerGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius, GLFWwindow* window) : GameObject(position, geom, shader, texture, scale), ColliderObject(radius) {
 		health = 3;
 		invincibility_timer = new Timer();
-		cooldown = new Timer();
 		window_ = window;
-		// @TODO: add components
-		components_.push_back(new TurretComponent(position, geom, shader, 6, scale, radius, this));
-		components_.push_back(new GunComponent(position, geom, shader, 9, scale, radius, components_[0]));
+		turret_component_ = new TurretComponent(position, geom, shader, 6, scale, radius, this);
+		gun_component_ = new GunComponent(position, geom, shader, 7, scale, radius, turret_component_);
+		components_.push_back(turret_component_);
+		components_.push_back(gun_component_);
 	}
 
 	PlayerGameObject::~PlayerGameObject() {
@@ -47,19 +47,20 @@ namespace game {
 	}
 
 	void PlayerGameObject::collect(const int type) {
-		/* TODO:Implement collect function
-		swtich (type) {
+		
+		switch (type) {
 			case 0:
 				// Add health
 				break;
 			case 1:
-				// Add ammo
+				gun_component_->addAmmo();
 				break;
 			case 2:
-				// Add invincibility
+				invincibility_timer->Start(invincibility_time);
+				invincible_ = true;
 				break;
 		}
-		*/
+		
 	}
 
 	bool PlayerGameObject::is_invincible() const {
