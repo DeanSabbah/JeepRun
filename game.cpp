@@ -14,6 +14,7 @@
 #include "enemy_game_object.h"
 #include "wandering_enemy_object.h"
 #include "ranged_enemy_object.h"
+#include "kamikaze_enemy_object.h"
 #include "bullet_projectile.h"
 #include "missile_projectile.h"
 #include "enemy_projectile_object.h"
@@ -90,9 +91,9 @@ void Game::SetupGameWorld(void)
     game_objects_[0]->SetRotation(pi_over_two);
 
     // Setup other objects
-    game_objects_.push_back(new RangedEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.4f));
+    game_objects_.push_back(new KamikazeEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.4f));
     game_objects_[1]->SetRotation(pi_over_two);
-    game_objects_.push_back(new RangedEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.4f));
+    game_objects_.push_back(new KamikazeEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.4f));
     game_objects_[2]->SetRotation(pi_over_two);
 	// Setup collectible objects in random locations
 	for (int i = 0; i < 90; i++) {
@@ -214,6 +215,8 @@ void Game::Update(double delta_time)
 		Explosion* exp = dynamic_cast<Explosion*>(current_game_object);
         // Evaluate if the current game object is a ranged enemy object
         RangedEnemyObject* ranged_enemy_curr = dynamic_cast<RangedEnemyObject*>(current_game_object);
+
+        KamikazeEnemyObject* kamikaze_enemy_curr = dynamic_cast<KamikazeEnemyObject*>(current_game_object);
         // Check if the object is dying
         if (current_game_object->isDying()) {
             // If the object is dying, check if the timer has finished
@@ -223,6 +226,16 @@ void Game::Update(double delta_time)
                     std::cout << "Game over" << std::endl;
                     glfwSetWindowShouldClose(window_, true);
                     return;
+                }
+                if (kamikaze_enemy_curr) {
+                    Explosion* exp_ = new Explosion(current_game_object->GetPosition(), sprite_, &sprite_shader_, tex_[11], glm::vec2(1.0f, 1.0f), 10.0f, 3.0f);
+                    GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), particles_, &explosion_shader_, tex_[4], exp_);
+                    particles->SetScale(glm::vec2(0.2f));
+                    particles->SetRotation(-pi_over_two);
+                    particle_systems_.push_back(particles);
+                    game_objects_.insert(game_objects_.begin() + i + 1, exp_);
+                    exp_->timer->Start(1);
+                    particles->timer->Start(1);
                 }
                 // If the timer has finished, remove the object from the game world
                 game_objects_.erase(game_objects_.begin() + i);
@@ -265,13 +278,24 @@ void Game::Update(double delta_time)
             float angle = acos(dot_product); // Angle in radians
             float angle_degrees = glm::degrees(angle);
 
-            // Check if the player is within ±30 degrees
+            // Check if the player is within Â±30 degrees
             if (angle_degrees <= 30.0f) {
-                // Player is within ±30 degrees of where the enemy is looking
+                // Player is within Â±30 degrees of where the enemy is looking
                 if (ranged_enemy_curr->getShootTimer()->Finished()) {
                     game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[10], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
                     ranged_enemy_curr->getShootTimer()->Start(2);
                 }
+            }
+        }
+
+        if (kamikaze_enemy_curr && !kamikaze_enemy_curr->isDying()) {
+            kamikaze_enemy_curr->updatePlayerPos(player->GetPosition());
+
+            kamikaze_enemy_curr->determineState();
+
+            if (kamikaze_enemy_curr->getState()) {
+                
+                kamikaze_enemy_curr->die();
             }
         }
 

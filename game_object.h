@@ -67,7 +67,7 @@ namespace game {
             int health = -1;
             // Bool to make sure the player is not hurt when they collide with a dying object
             bool _dying = false;
-            void die();
+            virtual void die();
             bool ghost_ = false;
             // Object's Transform Variables
             glm::vec3 position_;

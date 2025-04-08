@@ -10,6 +10,7 @@ WanderingEnemyObject::WanderingEnemyObject(const glm::vec3& position, Geometry* 
 	: EnemyGameObject(position, geom, shader, texture, scale, radius) {
 	t_ = new Timer();
 	t_->Start(3);
+	speed_ = 380.0f;
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> distrib(-1, 1);
