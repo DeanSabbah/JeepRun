@@ -368,7 +368,7 @@ void Game::Update(double delta_time)
                     break;
                 }
             }
-            if (exp && enemy && !exp->IsDamaged(other_game_object)) {
+            if (exp && enemy && !exp && !exp->IsDamaged(other_game_object)) {
 				float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
 				// Check if the object is within the explosion radius
                 if (distance <= exp->GetRadius()) {

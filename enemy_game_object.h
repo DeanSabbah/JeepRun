@@ -27,7 +27,7 @@ namespace game {
 			// Object's velocity
 			glm::vec3 velocity_;
 			// Object's speed
-			const float speed_ = 420.0f;
+			float speed_;
 			// Enemy states
 			virtual void patrol(double delta_time);
 			virtual void intercept(double delta_time);
