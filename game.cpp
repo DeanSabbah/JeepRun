@@ -372,7 +372,7 @@ void Game::Update(double delta_time)
                         GameObject* blood = new Blood(projectile_curr->GetPosition(), sprite_, &sprite_shader_);
                         blood->SetRotation(projectile_curr->GetRotation() + glm::pi<float>());
                         game_objects_.insert(game_objects_.begin() + 1, blood);
-                        GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &explosion_shader_, tex_[10], blood);
+                        GameObject* particles = new ParticleSystem(glm::vec3(-0.5f, 0.0f, 0.0f), blood_particles_, &explosion_shader_, tex_[11], blood);
                         particles->SetScale(glm::vec2(0.05f));
                         particles->SetRotation(-pi_over_two);
                         particle_systems_.push_back(particles);
