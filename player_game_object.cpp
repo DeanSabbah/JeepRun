@@ -25,13 +25,27 @@ namespace game {
 
 	// Update function for moving the player object around
 	void PlayerGameObject::Update(double delta_time) {
-		if(!_dying)
-			// Move player object
-			position_ += (float)delta_time * velocity_;
+		if (!_dying) {
+			// Apply friction to gradually reduce velocity
+			if (velocity_ > 0.01f) { 
+				velocity_ *= 0.98f;
+			}
+			else if (velocity_ < -0.01f) {
+				velocity_ *= 0.98f;
+			}
+			else {
+				velocity_ = 0.0f;
+			}
+
+			// Update position based on velocity and forward direction
+			position_ += (float)delta_time * velocity_ * GetBearing();
+		}
+
 		if (invincibility_timer->Finished()) {
 			invincible_ = false;
 			setTexture(1);
 		}
+
 		for (int i = 0; i < components_.size(); i++) {
 			components_[i]->Update(delta_time);
 		}
@@ -68,56 +82,24 @@ namespace game {
 	}
 	// case 0 = forward, 1 = backwards, 2 = right, 3 = left
 	void PlayerGameObject::update_velocity(int direction) {
-		glm::vec3 dir;
 		switch (direction) {
-			case 0:
-				dir = GetBearing();
+			case 0:// Forward
+				if (velocity_ < max_velocity_)
+					velocity_ += acceleration_;
 				break;
-			case 1:
-				dir = -1.0f * GetBearing();
+			case 1:// Backward
+				if (velocity_ > -max_velocity_ / 2.0f)
+					velocity_ -= acceleration_;
 				break;
-			case 2:
-				dir = GetRight();
-				break;
-			case 3:
-				dir = -1.0f * GetRight();
-				break;
-		}
-		if (glm::length(velocity_) < max_velocity_)
-			velocity_ += acceleration_ * dir;
-		else {
-			glm::vec3 targetDir = glm::normalize(dir);
-			glm::vec3 currentDir = glm::normalize(velocity_);
-			float dot = glm::dot(currentDir, targetDir);
-			dot = glm::clamp(dot, -1.0f, 1.0f);
-			float angle = glm::acos(dot);
-			float stepAngle = glm::radians(1.0f);
-			if (angle < stepAngle) stepAngle = angle;
-			glm::vec3 rotationAxis = glm::cross(currentDir, targetDir);
-			// Check if the rotation axis is parallel to the current direction
-			// If so, choose an arbitrary perpendicular axis
-			if (glm::length(rotationAxis) < 1e-6) {
-				if (dot < 0) {
-					// If opposite direction, rotate 180° around an arbitrary perpendicular axis
-					rotationAxis = glm::vec3(1, 0, 0); // Choose any axis perpendicular to currentDir
-					if (fabs(currentDir.x) > 0.9f)
-						rotationAxis = glm::vec3(0, 1, 0);
-				}
-				// If the direction is the same, do nothing
-				else {
-					return;
-				}
-			}
-			velocity_ = glm::rotate(currentDir, stepAngle, glm::normalize(rotationAxis)) * max_velocity_;
 		}
 	}
 
 	float PlayerGameObject::get_velocity() const {
-		return glm::length(velocity_);
+		return velocity_;
 	}
 
 	void PlayerGameObject::set_velocity(float velocity) {
-		velocity_ = velocity * GetBearing();
+		velocity_ = velocity;
 	}
 
 	void PlayerGameObject::shoot_projectile() {

@@ -36,6 +36,8 @@ namespace game {
 			void update_velocity(int direction);
 			// Get the velocity of the player
 			float get_velocity() const;
+			int GetHealth() const { return health; }
+			int GetAmmo() const { return gun_component_->getAmmo(); }
 			// Get the window
 			inline GLFWwindow* get_window() const { return window_; }
 			// Get component at index i
@@ -59,15 +61,13 @@ namespace game {
 			// Acceleration of the player
 			const float acceleration_ = 0.05f;
 			// Velocity of the player
-			glm::vec3 velocity_ = glm::vec3(0.0f, 0.0f, 0.0f);
+			float velocity_ = 0.0f;
 			// Number of objects needed to collect to become invincible
 			const int objs_needed = 10;
 			// Number of objects collected
 			int collected_objs = 0;
 			// Amount of time the player is invincible
 			const float invincibility_time = 5.0f;
-			// Bool to check if the player is invincible
-            bool invincible_= false;
 			// Components
 			// 0 = turret, 1 = gun
 			std::vector<ComponentGameObject*> components_;

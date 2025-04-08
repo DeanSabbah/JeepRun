@@ -65,6 +65,9 @@ void GameObject::Render(glm::mat4 view_matrix, double current_time){
 
     // Set the grayscale mode
     shader_->SetUniform1i("grayscale", ghost_);
+    
+	// Set the invincibility mode
+	shader_->SetUniform1i("invincible", invincible_);
 
     // Set up the view matrix
     shader_->SetUniformMat4("view_matrix", view_matrix);

@@ -31,6 +31,10 @@ set(HDRS
     particle_system.h
     blood_particles.h
     explosion.h
+    hud.h
+    hud_elm.h
+    drawing_game_object.h
+    text_game_object.h
 )
  
 set(SRCS
@@ -58,11 +62,18 @@ set(SRCS
     particle_system.cpp
     blood_particles.cpp
     explosion.cpp
+    hud.cpp
+    hud_elm.cpp
+    drawing_game_object.cpp
+    text_game_object.cpp
+
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
     explosion_vertex_shader.glsl
     particle_fragment_shader.glsl
-    blood_vertex_shader.glslz
+    blood_vertex_shader.glsl
+    text_fragment_shader.glsl
+    drawing_fragment_shader.glsl
 )
 
 # Add path name to configuration file

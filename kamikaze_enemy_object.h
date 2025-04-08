@@ -16,7 +16,7 @@ namespace game {
         void die() override;
 
     private:
-        const float min_distance_ = 1.5f;
+        const float min_distance_ = 1.0f;
     };
 }
 

@@ -9,6 +9,7 @@
 #include "shader.h"
 #include "game_object.h"
 #include "timer.h"
+#include "hud.h"
 
 namespace game {
 
@@ -34,6 +35,7 @@ namespace game {
             void MainLoop(void); 
 
         private:
+            HUD* hud_;
             // Main window: pointer to the GLFW window structure
             GLFWwindow *window_;
 
