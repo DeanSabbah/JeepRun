@@ -29,3 +29,6 @@ SOURCES:
 
 	HD transparent picture.png: https://commons.wikimedia.org/wiki/File:HD_transparent_picture.png
 	Licence: Creative Commons Attribution-Share Alike 4.0 International: https://creativecommons.org/licenses/by-sa/4.0/deed.en
+
+	2D Health & Ammo Pickups: https://fightswithbears.itch.io/2d-health-and-ammo-pickups
+	Licence: "Feel free to use for whatever."

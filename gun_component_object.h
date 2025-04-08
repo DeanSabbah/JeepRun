@@ -16,6 +16,7 @@ namespace game {
 
 		//Getters
 		inline int getState() const { return state_; }
+		inline int getAmmo() const { return (state_ == 0) ? ammo_bullet_ : ammo_missile_; }
 		inline bool hasAmmo() const { return (state_ == 0) ? ammo_bullet_ > 0 : ammo_missile_ > 0; }
 
 		// Gun functions

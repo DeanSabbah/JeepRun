@@ -80,7 +80,7 @@ void Game::SetupGameWorld(void)
 	textures.push_back("/textures/nothing.png");
 	textures.push_back("/textures/square.png");
     textures.push_back("/textures/health-red 32px.png");
-    textures.push_back("/textures/ammo-rilfe 32px.png");
+    textures.push_back("/textures/ammo-rifle 32px.png");
     textures.push_back("/textures/orb_yellow.png");
     // Load textures
     LoadTextures(textures);
@@ -129,6 +129,9 @@ void Game::SetupGameWorld(void)
 			game_objects_.push_back(background);
         }
     }
+    
+    // Initialize hud
+    hud_ = new HUD(&sprite_shader_, sprite_, tex_[square]);
 
 	spawn_timer = new Timer();
 }
@@ -172,17 +175,10 @@ void Game::HandleControls(double delta_time)
         }
         if (glfwGetKey(window_, GLFW_KEY_D) == GLFW_PRESS) {
             player->SetRotation(angle - (angle_increment * std::min(player->get_velocity(), 1.0f)));
-            
         }
         if (glfwGetKey(window_, GLFW_KEY_A) == GLFW_PRESS) {
             player->SetRotation(angle + (angle_increment * std::min(player->get_velocity(), 1.0f)));
         }
-        /*if (glfwGetKey(window_, GLFW_KEY_Q) == GLFW_PRESS) {
-            player->update_velocity(3);
-        }
-        if (glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS) {
-            player->update_velocity(2);
-        }*/
         if (glfwGetKey(window_, GLFW_KEY_1) == GLFW_PRESS) {
 			GunComponent* gun = dynamic_cast<GunComponent*>(player->getComponent(1));
 			gun->setState(0);
@@ -304,14 +300,8 @@ void Game::Update(double delta_time)
                 }
             }
         }
-
         if (kamikaze_enemy_curr && !kamikaze_enemy_curr->isDying()) {
-            kamikaze_enemy_curr->updatePlayerPos(player->GetPosition());
-
-            kamikaze_enemy_curr->determineState();
-
-            if (kamikaze_enemy_curr->getState()) {
-                
+            if (kamikaze_enemy_curr->getState()) {                
                 kamikaze_enemy_curr->die();
             }
         }
@@ -451,6 +441,8 @@ void Game::Update(double delta_time)
 			delete particles;
 		}
 	}
+
+    hud_->Update(delta_time);
 }
 
 
@@ -488,6 +480,8 @@ void Game::Render(void){
 	for (int i = 0; i < particle_systems_.size(); i++) {
 		particle_systems_[i]->Render(view_matrix, current_time_);
 	}
+    glm::mat4 ortho_matrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+    hud_->Render(ortho_matrix);
 }
 
 

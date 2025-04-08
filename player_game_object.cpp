@@ -27,14 +27,14 @@ namespace game {
 	void PlayerGameObject::Update(double delta_time) {
 		if (!_dying) {
 			// Apply friction to gradually reduce velocity
-			if (velocity_ > 0.01f) { // Avoid floating-point precision issues
-				velocity_ *= 0.98f; // Adjust friction factor as needed (closer to 1 = less friction)
+			if (velocity_ > 0.01f) { 
+				velocity_ *= 0.98f;
 			}
 			else if (velocity_ < -0.01f) {
-				velocity_ *= 0.98f; // Adjust friction factor as needed (closer to 1 = less friction)
+				velocity_ *= 0.98f;
 			}
 			else {
-				velocity_ = 0.0f; // Stop completely if velocity is very small
+				velocity_ = 0.0f;
 			}
 
 			// Update position based on velocity and forward direction
@@ -95,7 +95,7 @@ namespace game {
 	}
 
 	float PlayerGameObject::get_velocity() const {
-		return glm::length(velocity_);
+		return velocity_;
 	}
 
 	void PlayerGameObject::set_velocity(float velocity) {

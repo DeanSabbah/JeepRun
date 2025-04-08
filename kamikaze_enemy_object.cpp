@@ -38,7 +38,6 @@ void KamikazeEnemyObject::Update(double delta_time) {
 
 void KamikazeEnemyObject::determineState() {
 	// If the distance to the player is less than 2.0f, set the state to true, else set it to false
-	
 	if (distance_ < min_distance_)
 		state_ = Explode;
 	else

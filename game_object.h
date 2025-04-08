@@ -83,6 +83,8 @@ namespace game {
 
             // Object's texture reference
             GLuint texture_;
+            // Bool to check if the player is invincible
+            bool invincible_ = false;
 
     }; // class GameObject
 
