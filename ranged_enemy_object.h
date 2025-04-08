@@ -27,7 +27,6 @@ namespace game {
     private:
         Timer *t_;
         Timer *shoot_timer_;
-        const float speed_ = 0.2f;
 		const float range_ = 4.0f;
 		const float follow_range_ = 6.0f;
 		const float min_distance_ = 2.0f;

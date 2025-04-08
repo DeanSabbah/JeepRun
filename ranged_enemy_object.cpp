@@ -9,6 +9,7 @@ using namespace game;
 RangedEnemyObject::RangedEnemyObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius)
 	: EnemyGameObject(position, geom, shader, texture, scale, radius) {
 	health = 3;
+	speed_ = 420.0f;
 	shoot_timer_ = new Timer();
 	t_ = new Timer();
 	t_->Start(3);

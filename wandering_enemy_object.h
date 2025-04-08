@@ -14,7 +14,6 @@ namespace game {
     private:
 
         Timer* t_;
-        const float speed_ = 0.2f;
     };
 }
 
