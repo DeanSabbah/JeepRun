@@ -32,7 +32,6 @@ set(HDRS
     blood_particles.h
     explosion.h
     hud.h
-    hud_elm.h
     drawing_game_object.h
     text_game_object.h
 )
@@ -63,7 +62,6 @@ set(SRCS
     blood_particles.cpp
     explosion.cpp
     hud.cpp
-    hud_elm.cpp
     drawing_game_object.cpp
     text_game_object.cpp
 
