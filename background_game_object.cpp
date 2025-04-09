@@ -7,7 +7,7 @@ namespace game {
 
 	void BackgroundGameObject::Render(glm::mat4 view_matrix, double current_time) {
 		for (int i = -4;i < 5;i++) {
-			for (int j = -4;j < 5;j++) {
+			for (int j = -1;j < 5;j++) {
                 // Set up the shader
                 shader_->Enable();
 

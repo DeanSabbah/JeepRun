@@ -38,8 +38,8 @@ const char *window_title_g = "Game Demo";
 const unsigned int window_width_g = 800;
 const unsigned int window_height_g = 600;
 const glm::vec3 viewport_background_color_g(0.0, 0.0, 1.0);
-// Const to keep track of the number of background objects
-const int BACKGROUND_OBJECTS = 9;
+// Const to keep track of the number of background and hud objects
+const int BACKGROUND_OBJECTS = 2;
 
 // Directory with game resources such as textures
 const std::string resources_directory_g = RESOURCES_DIRECTORY;
@@ -126,34 +126,12 @@ void Game::SetupGameWorld(void)
 		game_objects_[3 + i]->SetRotation(pi_over_two);
 	}
 
-    // Setup background
-    // In this specific implementation, the background is always the
-    // last 9 objects
-    /*for (int i = -1; i < 2; i++) {
-        for (int j = -1; j < 2; j++) {
-			GameObject* background = new GameObject(glm::vec3(i * 12.0f, j * 12.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_stars], glm::vec2(1.0f, 1.0f));
-			background->SetScale(glm::vec2(12.0, 12.0));
-			game_objects_.push_back(background);
-        }
-    }*/
-    
-    /*glBindTexture(GL_TEXTURE_2D, tex_[tex_stars]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat horizontally
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat vertically
-
-    glUniform2f(glGetUniformLocation(shader_id, "uv_repeat"), 5.0f, 5.0f);*/
-
+    // Setup background object
+    // The background is always the last before object
     BackgroundGameObject* background = new BackgroundGameObject(glm::vec3(12.0f, 12.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_stars], glm::vec2(1.0f, 1.0f));
     background->SetScale(glm::vec2(12.0f, 12.0f));
     game_objects_.push_back(background);
-    
-
-    for (int i = 0;i < 12; i++) {
-        for (int j = 0;j < 12;j++) {
-
-        }
-    }
-    
+        
     // Initialize hud
     hud_ = new HUD(&sprite_shader_, sprite_, tex_[nothing], dynamic_cast<PlayerGameObject*>(game_objects_[0]));
 	DrawingGameObject* healthbar = new DrawingGameObject(glm::vec3(-0.9f, 0.8f, 0.0f), sprite_, &drawing_shader_, tex_[nothing], glm::vec2(0.0f, 0.0f));
@@ -438,7 +416,6 @@ void Game::Update(double delta_time)
 					exp->AddAffectedObject(other_game_object);
                     // If the object is within the explosion radius, deal damage to the object
                     int damage = std::ceil(exp->GetDamageAt(distance));
-					std::cout << "Damage against enemy: " << damage << std::endl;
                     for (int i = 0; i < damage; i++) {
                         other_game_object->hurt();
                         if(other_game_object->isDying())
@@ -454,7 +431,6 @@ void Game::Update(double delta_time)
 					exp_other->AddAffectedObject(player);
 					// If the object is within the explosion radius, deal damage to the object
 					int damage = std::ceil(exp_other->GetDamageAt(distance));
-					std::cout << "Damage against player: " << damage << std::endl;
                     for (int i = 0; i < damage; i++) {
                         player->hurt();
                         if (player->isDying())

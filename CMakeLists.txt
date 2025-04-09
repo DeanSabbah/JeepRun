@@ -35,6 +35,8 @@ set(HDRS
     hud.h
     drawing_game_object.h
     text_game_object.h
+    end_goal_object.h
+    weakling_game_object.h
 )
  
 set(SRCS
@@ -66,6 +68,8 @@ set(SRCS
     hud.cpp
     drawing_game_object.cpp
     text_game_object.cpp
+    end_goal_object.cpp
+    weakling_game_object.cpp
 
     sprite_vertex_shader.glsl
     sprite_fragment_shader.glsl
