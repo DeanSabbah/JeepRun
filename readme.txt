@@ -2,8 +2,35 @@ Dean Sabbah
 101199120
 
 Marko Celenkovic
+101313325
 
 The game was developed in Windows 10
+
+Jeep Run is a game where you drive around as a Jeep and shoot zombies, protecting the "Weaklings" as they guide you toward an escape boat. The Zombies will attack you and the Weaklings, and its your job to make sure they make it to the boat. If at least 1 Weakling makes it to the boat you win, otherwise the Zombies win!
+
+The game uses WASD for movement, and the Jeep moves like a real life Jeep (no turning while stationary, decelerates unless you hold the button). Left click to fire your weapon, which starts off as the machine gun. Click "2" to switch to the missile launcher, and "1" to switch back to the machine gun. You can switch back and forth as many times as you want, switching between the rapid-fire machine gun and the explosive missile launcher (note the explosions it makes will damage you as well).
+
+1. End goal and enemies to kill, objective to protect
+
+2. 3 different enemy types (wandering, ranged, kamikaze) each with unique abilities
+
+3. 2 Different weapons (Machine gun and Missile Launcher)
+
+4. 3 different collectible items (Health, extra ammo, temporary invincibility)
+
+5. Movement of the player similar to how a Jeep would move in real life, physically-based and parametric-based movement used
+
+6. Collision detection used for player with enemies, player with collectibles, enemies with weaklings, and weaklings with end objective
+
+7. Large game world created with tiling
+
+8. Particle systems for explosions and blood when the zombies are hit
+
+9. Hierarchical transformation for the player (car chasis, turret, and switchable gun all seperate)
+
+10. HUD showing the players health, and ammo left for both guns
+
+11. Advanced steering for the ranged enemy (uses persue, patrol and evade)
 
 SOURCES:
 	Spaceship sprites: https://opengameart.org/content/spaceships-32x32
@@ -46,3 +73,15 @@ SOURCES:
 
 	2D Pixel Guns pack: https://munstudios.itch.io/2d-pixel-guns-pack
 	You can use them in any of your 2d pixel art-based games or prototypes. All the guns are free.
+
+	basic boat: https://gamer247.itch.io/barco
+	No licence
+
+	top down assest shooter: https://anwar2077.itch.io/top-down-assest-shooter
+	No licence
+
+	Pixel Art Jeep: https://opengameart.org/content/pixel-art-jeep
+	CC BY 4.0
+
+	Ground Shaker: https://zintoki.itch.io/ground-shaker
+	CC0 1.0

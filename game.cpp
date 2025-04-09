@@ -27,6 +27,8 @@
 #include "blood.h"
 #include "drawing_game_object.h"
 #include "text_game_object.h"
+#include "end_goal_object.h"
+#include "weakling_game_object.h"
 
 namespace game {
 
@@ -73,8 +75,9 @@ void Game::SetupGameWorld(void)
            text = 15,
            wanderer = 16,
            barrel = 17,
-           rocket = 18
-    };
+           rocket = 18,
+		   boat = 19,
+           weakling = 20};
     textures.push_back("/textures/jeep_trailcat.png"); 
     textures.push_back("/textures/ZombieToast.png"); 
     textures.push_back("/textures/gun.png");
@@ -89,11 +92,13 @@ void Game::SetupGameWorld(void)
 	textures.push_back("/textures/square.png");
     textures.push_back("/textures/health-red 32px.png");
     textures.push_back("/textures/ammo-rifle 32px.png");
-    textures.push_back("/textures/orb_yellow.png");
+    textures.push_back("/textures/invincibility.png");
     textures.push_back("/textures/font.png");
     textures.push_back("/textures/idle.png");
     textures.push_back("/textures/barrel_01_mk1.png");
     textures.push_back("/textures/rocket_01_mk1.png");
+    textures.push_back("/textures/boat.png");
+	textures.push_back("/textures/weakling.png");
     // Load textures
     LoadTextures(textures);
 
@@ -130,6 +135,19 @@ void Game::SetupGameWorld(void)
 		game_objects_.push_back(new CollectibleGameObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[type + 12], glm::vec2(1.0f, 1.0f), type, 0.3f));
 		game_objects_[3 + i]->SetRotation(pi_over_two);
 	}
+
+	EndGoalObject* end_goal = new EndGoalObject(glm::vec3(0.0f, 54.0f, 0.0f), sprite_, &sprite_shader_, tex_[boat], glm::vec2(3.5f), 3.0f);
+	game_objects_.push_back(end_goal);
+	// Setup weakling objects
+    for (int i = 0; i < 5; i++) {
+        float x = (rand() % 24) - 12;
+        float y = (rand() % 6) + 3;
+        glm::vec3 goal = glm::vec3(0.0f, 68.0f, 0.0f);
+        WeaklingObject* weakling_ = new WeaklingObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[weakling], glm::vec2(1.0f, 1.0f), 0.5f, goal);
+        weakling_->SetRotation(pi_over_two);
+        end_goal->addWeakling(weakling_);
+        game_objects_.push_back(weakling_);
+    }
 
     // Setup background object
     // The background is always the last before object
@@ -177,7 +195,7 @@ void Game::HandleControls(double delta_time)
     glm::vec3 dir = player->GetBearing();
     // Adjust motion increment and angle increment 
     // if translation or rotation is too slow
-    float speed = delta_time*1000.0;
+    float speed = delta_time*1200.0;
     float motion_increment = 0.001*speed;
     float angle_increment = (glm::pi<float>() / 1800.0f)*speed;
 
@@ -249,6 +267,10 @@ void Game::Update(double delta_time)
         RangedEnemyObject* ranged_enemy_curr = dynamic_cast<RangedEnemyObject*>(current_game_object);
 
         KamikazeEnemyObject* kamikaze_enemy_curr = dynamic_cast<KamikazeEnemyObject*>(current_game_object);
+
+		WeaklingObject* weakling_curr = dynamic_cast<WeaklingObject*>(current_game_object);
+
+		EndGoalObject* end_goal_curr = dynamic_cast<EndGoalObject*>(current_game_object);
         // Check if the object is dying
         if (current_game_object->isDying()) {
             // If the object is dying, check if the timer has finished
@@ -288,7 +310,7 @@ void Game::Update(double delta_time)
             delete current_game_object;
             continue;
         }
-        if(ranged_enemy_curr && !ranged_enemy_curr->isDying() && ranged_enemy_curr->inRange()) {
+        if(ranged_enemy_curr && !ranged_enemy_curr->isDying() && ranged_enemy_curr->inRange(player->GetPosition())) {
             ranged_enemy_curr->updatePlayerPos(player->GetPosition());
 
             // Calculate direction vectors
@@ -314,11 +336,6 @@ void Game::Update(double delta_time)
                 ranged_enemy_curr->getShootTimer()->Start(2);
             }
         }
-        if (kamikaze_enemy_curr && !kamikaze_enemy_curr->isDying()) {
-            if (kamikaze_enemy_curr->getState()) {                
-                kamikaze_enemy_curr->die();
-            }
-        }
 
         // Check for collision with other game objects
         // Note the loop bounds: we avoid testing the last 9 objects since
@@ -333,8 +350,16 @@ void Game::Update(double delta_time)
 			CollectibleGameObject* collectible = dynamic_cast<CollectibleGameObject*>(other_game_object);
 			// Evaluate if other game object is an explosion
 			Explosion* exp_other = dynamic_cast<Explosion*>(other_game_object);
+			WeaklingObject* weakling_other = dynamic_cast<WeaklingObject*>(other_game_object);
+			EndGoalObject* end_goal_other = dynamic_cast<EndGoalObject*>(other_game_object);
             // Compute distance between object i and object j
             float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
+
+            if (kamikaze_enemy_curr && !kamikaze_enemy_curr->isDying() && (weakling_other || other_game_object == player)) {
+                if (kamikaze_enemy_curr->inRange(other_game_object->GetPosition())) {
+                    kamikaze_enemy_curr->die();
+                }
+            }
             if (current_game_object == player) {
                 if (collider && player->collide(collider)) {
                     // Checks to see if the object that it is currently colliding with the player is new
@@ -343,8 +368,8 @@ void Game::Update(double delta_time)
 							// If the object is a collectible object, collect it
                             player->collect(collectible->getType());
 							// Sets the object to ghost mode
-							collectible->setGhostMode(true);
-							// @TODO: Change it to delete collectible objects after collection
+							game_objects_.erase(game_objects_.begin() + j);
+							delete other_game_object;
 						}
 						else if(!player->isDying() && enemy){
 							// Deals damage to the player and the object that the player collided with
@@ -364,6 +389,26 @@ void Game::Update(double delta_time)
                 // This is to ensure that only 1 health is removed per collision
                 else if(other_game_object == player->prev_collider)
                     current_game_object->prev_collider = nullptr;
+            }
+            else if (ranged_enemy_curr && weakling_other && ranged_enemy_curr->inRange(weakling_curr->GetPosition())) {
+				ranged_enemy_curr->updatePlayerPos(weakling_curr->GetPosition());
+				// Calculate direction vectors
+				glm::vec3 player_pos = weakling_curr->GetPosition();
+				glm::vec3 enemy_pos = ranged_enemy_curr->GetPosition();
+				glm::vec3 direction_to_player = glm::normalize(player_pos - enemy_pos);
+				glm::vec3 enemy_forward = glm::vec3(cos(ranged_enemy_curr->GetRotation()), sin(ranged_enemy_curr->GetRotation()), 0.0f);
+				// Normalize vectors
+				enemy_forward = glm::normalize(enemy_forward);
+				// Calculate dot product
+				float dot_product = glm::dot(direction_to_player, enemy_forward);
+				// Calculate angle
+				float angle = acos(dot_product);
+				float angle_degrees = glm::degrees(angle);
+				// Player is within ±30 degrees of where the enemy is looking
+                if (ranged_enemy_curr->getShootTimer()->Finished()) {
+                    game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[8], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+                    ranged_enemy_curr->getShootTimer()->Start(2);
+                }
             }
             else if (projectile_curr && !ranged_enemy_proj) {
 				//check if enemy is colliding with projectile
@@ -404,7 +449,7 @@ void Game::Update(double delta_time)
                 }
             }
             else if (ranged_enemy_proj) {
-                if (ranged_enemy_proj->collide(player) && !player->isDying()) {
+                if ((ranged_enemy_proj->collide(player) && !player->isDying())) {
 					// If the object is a ranged enemy projectile, deal damage to the player
 					player->hurt();
 					// Remove the projectile from the game world
@@ -412,8 +457,15 @@ void Game::Update(double delta_time)
 					delete current_game_object;
                     break;
                 }
+                else if (weakling_curr && ranged_enemy_proj->collide(weakling_curr) && !weakling_curr->isDying()) {
+					weakling_curr->hurt();
+					// Remove the projectile from the game world
+					game_objects_.erase(game_objects_.begin() + i);
+					delete current_game_object;
+					break;
+                }
             }
-            if (exp && enemy && !exp_other && !exp->IsDamaged(other_game_object)) {
+            else if (exp && (enemy || weakling_other) && !exp_other && !exp->IsDamaged(other_game_object)) {
 				float distance = glm::length(current_game_object->GetPosition() - other_game_object->GetPosition());
 				// Check if the object is within the explosion radius
                 if (distance <= exp->GetRadius()) {
@@ -441,6 +493,21 @@ void Game::Update(double delta_time)
                         if (player->isDying())
                             break;
                     }
+                }
+            }
+            else if (weakling_other && end_goal_curr && end_goal_curr->collide(weakling_other) && !weakling_other->isDying()) {
+				std::cout << "Weakling reached end goal" << std::endl;
+                weakling_other->reachEnd();
+                end_goal_curr->addWeakling(weakling_other);
+                switch (end_goal_curr->checkEndGoal()) {
+                case 1:
+					std::cout << "You win!" << std::endl;
+					glfwSetWindowShouldClose(window_, true);
+					return;
+                case 2:
+					std::cout << "You lose!" << std::endl;
+					glfwSetWindowShouldClose(window_, true);
+					return;
                 }
             }
         }
@@ -503,7 +570,7 @@ void Game::MainLoop(void)
     // Loop while the user did not close the window
     double last_time = glfwGetTime();
     spawn_timer = new Timer();
-	spawn_timer->Start(10);
+	spawn_timer->Start(2);
     while (!glfwWindowShouldClose(window_)){
 
         // Calculate delta time
@@ -675,6 +742,7 @@ void Game::SpawnObject() {
 		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);
     }
 	else if (random >= 1 && random <= 5) {
+		std::cout << "spawning wanderer" << std::endl;
 		WanderingEnemyObject* new_enemy = new WanderingEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[16], glm::vec2(1.0f, 1.0f), 0.4f);
 		new_enemy->SetRotation(pi_over_two);
 		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);

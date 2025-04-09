@@ -13,6 +13,13 @@ namespace game {
         void Update(double delta_time) override;
         void determineState() override;
         bool getState();
+		bool inRange(glm::vec3 pos) { 
+            bool dist = glm::distance(pos, position_) <= min_distance_;
+			if (dist) {
+				state_ = 1;
+			}
+			return dist;
+        }
         void die() override;
 
     private:
