@@ -9,6 +9,7 @@ set(HDRS
     file_utils.h
     game.h
     game_object.h
+    background_game_object.h
     player_game_object.h
     collectible_game_object.h
     enemy_game_object.h
@@ -41,6 +42,7 @@ set(SRCS
     game.cpp
     main.cpp
     game_object.cpp
+    background_game_object.cpp
     player_game_object.cpp
     collectible_game_object.cpp
     enemy_game_object.cpp
