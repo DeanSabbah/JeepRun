@@ -57,6 +57,12 @@ namespace game {
 			// Shader for rendering blood particles
 			Shader blood_shader_;
 
+			// Shader for drawing objects
+			Shader drawing_shader_;
+
+            // Shader for drawing text
+			Shader text_shader_;
+
             // References to textures
             // This needs to be a pointer
             GLuint *tex_;

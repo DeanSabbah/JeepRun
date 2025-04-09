@@ -4,8 +4,7 @@
 
 namespace game {
 
-TextGameObject::TextGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) : GameObject(position, geom, shader, texture) {
-
+TextGameObject::TextGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture) : GameObject(position, geom, shader, texture, glm::vec2(1.0)) {
     text_ = "";
 }
 
@@ -19,13 +18,13 @@ void TextGameObject::Render(glm::mat4 view_matrix, double current_time) {
     shader_->SetUniformMat4("view_matrix", view_matrix);
 
     // Setup the scaling matrix for the shader
-    glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(xscale_, yscale_, 1.0));
+    glm::mat4 scaling_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale_.x, scale_.y, 1.0));
 
     // Setup the rotation matrix for the shader
     glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_, glm::vec3(0.0, 0.0, 1.0));
 
     // Set up the translation matrix for the shader
-    glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), position_);
+    glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), pos_);
 
     // Setup the transformation matrix for the shader
     glm::mat4 transformation_matrix = translation_matrix * rotation_matrix * scaling_matrix;
@@ -41,8 +40,9 @@ void TextGameObject::Render(glm::mat4 view_matrix, double current_time) {
 
     // Set the text
 #define TEXT_LENGTH 40
+    std::string ammo_string = std::to_string(ammo_count_);
     // Set text length
-    int final_size = text_.size();
+    int final_size = text_.size() + ammo_string.size();
     if (final_size > TEXT_LENGTH){
         final_size = TEXT_LENGTH;
     }
@@ -50,9 +50,13 @@ void TextGameObject::Render(glm::mat4 view_matrix, double current_time) {
 
     // Set the text data
     GLint data[TEXT_LENGTH];
-    for (int i = 0; i < final_size; i++){
+    for (int i = 0; i < final_size - ammo_string.size(); i++){
         data[i] = text_[i];
     }
+	for (int i = final_size - ammo_string.size(); i < final_size; i++) {
+		data[i] = ammo_string[i - (final_size - ammo_string.size())];
+	}
+
     shader_->SetUniformIntArray("text_content", final_size, data);
 
     // Draw the entity

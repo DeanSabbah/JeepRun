@@ -24,6 +24,8 @@
 #include "particle_system.h"
 #include "explosion.h"
 #include "blood.h"
+#include "drawing_game_object.h"
+#include "text_game_object.h"
 
 namespace game {
 
@@ -66,7 +68,8 @@ void Game::SetupGameWorld(void)
            square = 11,
            health = 12,
            bullet_ammo = 13,
-           yellow_orb = 14 };
+           yellow_orb = 14,
+           text = 15};
     textures.push_back("/textures/Ship_4.png"); 
     textures.push_back("/textures/Ship_2.png"); 
     textures.push_back("/textures/Ship_5.png");
@@ -82,6 +85,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/health-red 32px.png");
     textures.push_back("/textures/ammo-rifle 32px.png");
     textures.push_back("/textures/orb_yellow.png");
+    textures.push_back("/textures/font.png");
     // Load textures
     LoadTextures(textures);
 
@@ -131,7 +135,19 @@ void Game::SetupGameWorld(void)
     }
     
     // Initialize hud
-    hud_ = new HUD(&sprite_shader_, sprite_, tex_[square]);
+    hud_ = new HUD(&sprite_shader_, sprite_, tex_[nothing], dynamic_cast<PlayerGameObject*>(game_objects_[0]));
+	DrawingGameObject* healthbar = new DrawingGameObject(glm::vec3(-0.9f, 0.8f, 0.0f), sprite_, &drawing_shader_, tex_[nothing], glm::vec2(0.0f, 0.0f));
+	hud_->addHudElement(healthbar);
+	TextGameObject* ammo_bullets = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[text]);
+	ammo_bullets->SetText("Bullets: ");
+	ammo_bullets->SetPos(glm::vec3(0.6f, -0.7f, 0.0f));
+	ammo_bullets->SetScale(glm::vec2(0.5f, 0.1f));
+	hud_->addHudElement(ammo_bullets);
+	TextGameObject* ammo_rockets = new TextGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &text_shader_, tex_[text]);
+	ammo_rockets->SetText("Rockets: ");
+	ammo_rockets->SetPos(glm::vec3(0.6f, -0.8f, 0.0f));
+    ammo_rockets->SetScale(glm::vec2(0.5f, 0.1f));
+	hud_->addHudElement(ammo_rockets);
 
 	spawn_timer = new Timer();
 }
@@ -281,7 +297,6 @@ void Game::Update(double delta_time)
             glm::vec3 enemy_forward = glm::vec3(cos(ranged_enemy_curr->GetRotation()), sin(ranged_enemy_curr->GetRotation()), 0.0f);
 
             // Normalize vectors
-            direction_to_player = glm::normalize(direction_to_player);
             enemy_forward = glm::normalize(enemy_forward);
 
             // Calculate dot product
@@ -295,7 +310,7 @@ void Game::Update(double delta_time)
             if (angle_degrees <= 30.0f) {
                 // Player is within ±30 degrees of where the enemy is looking
                 if (ranged_enemy_curr->getShootTimer()->Finished()) {
-                    game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[10], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+                    game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[8], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
                     ranged_enemy_curr->getShootTimer()->Start(2);
                 }
             }
@@ -472,6 +487,9 @@ void Game::Render(void){
 	glm::mat4 camera_translation_matrix = glm::translate(glm::mat4(1.0f), -game_objects_[0]->GetPosition());
     glm::mat4 view_matrix = window_scale_matrix * camera_zoom_matrix * camera_translation_matrix;
 
+    // Render hud and hud elms
+    glm::mat4 ortho_matrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+    hud_->Render(ortho_matrix, current_time_);
     // Render all game objects
     for (int i = 0; i < game_objects_.size(); i++) {
         game_objects_[i]->Render(view_matrix, current_time_);
@@ -480,8 +498,6 @@ void Game::Render(void){
 	for (int i = 0; i < particle_systems_.size(); i++) {
 		particle_systems_[i]->Render(view_matrix, current_time_);
 	}
-    glm::mat4 ortho_matrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
-    hud_->Render(ortho_matrix);
 }
 
 
@@ -574,9 +590,12 @@ void Game::Init(void)
     sprite_shader_.Init((resources_directory_g+std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g+std::string("/sprite_fragment_shader.glsl")).c_str());
     // Initialize particle shader
     explosion_shader_.Init((resources_directory_g + std::string("/explosion_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
-
 	// Initialize blood shader
 	blood_shader_.Init((resources_directory_g + std::string("/blood_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/particle_fragment_shader.glsl")).c_str());
+    // Initialize the drawing shader
+	drawing_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/drawing_fragment_shader.glsl")).c_str());
+    // Initialize the text shader
+	text_shader_.Init((resources_directory_g + std::string("/sprite_vertex_shader.glsl")).c_str(), (resources_directory_g + std::string("/text_fragment_shader.glsl")).c_str());
 
     // Initialize time
     current_time_ = 0.0;
@@ -652,13 +671,22 @@ void Game::SpawnObject() {
     // Randomly generate a location for the new object
 	float x = (rand() % 30) - 15;
 	float y = (rand() % 30) - 15;
-	// use either texture 1 or 2
-	int texture = rand() % 2 + 1;
-	// Create the new object
-	EnemyGameObject* new_object = new EnemyGameObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[texture], glm::vec2(1.0f, 1.0f), 0.5f);
-    new_object->SetRotation(pi_over_two);
-	// Add the new object to the game world
-	game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_object);
+    int random = rand() % 10;
+    if (random == 0) {
+		KamikazeEnemyObject* new_enemy = new KamikazeEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[0], glm::vec2(1.0f, 1.0f), 0.4f);
+		new_enemy->SetRotation(pi_over_two);
+		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);
+    }
+	else if (random >= 1 && random <= 5) {
+		WanderingEnemyObject* new_enemy = new WanderingEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[1], glm::vec2(1.0f, 1.0f), 0.4f);
+		new_enemy->SetRotation(pi_over_two);
+		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);
+	}
+	else {
+		RangedEnemyObject* new_enemy = new RangedEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[2], glm::vec2(1.0f, 1.0f), 0.4f);
+		new_enemy->SetRotation(pi_over_two);
+		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);
+	}
 	// Restart the spawn timer
 	spawn_timer->Start(2.0f);
 }
