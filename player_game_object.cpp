@@ -12,8 +12,8 @@ namespace game {
 		health = 15;
 		invincibility_timer = new Timer();
 		window_ = window;
-		turret_component_ = new TurretComponent(position, geom, shader, 6, scale, radius, this);
-		gun_component_ = new GunComponent(position, geom, shader, 7, scale, radius, turret_component_);
+		turret_component_ = new TurretComponent(position, geom, shader, 7, glm::vec2(0.5f), radius, this);
+		gun_component_ = new GunComponent(position, geom, shader, 18, glm::vec2(0.4f, 0.2f), radius, turret_component_);
 		components_.push_back(turret_component_);
 		components_.push_back(gun_component_);
 	}

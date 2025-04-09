@@ -12,6 +12,7 @@ GunComponent::GunComponent(const glm::vec3& position, Geometry* geom, Shader* sh
 void GunComponent::init() {
 	position_ = parent_->GetPosition();
 	SetRotation(parent_->GetRotation());
+	position_ += GetBearing() * 0.45f;
 }
 
 void GunComponent::setState(const int s) {
@@ -19,10 +20,10 @@ void GunComponent::setState(const int s) {
 	switch (state_) {
 		case 0:
 			fire_rate_ = 0.2f;
-			setTexture(9);
+			setTexture(18);
 			break;
 		case 1:
-			setTexture(10);
+			setTexture(19);
 			fire_rate_ = 1.2f;
 			break;
 	}
@@ -61,5 +62,6 @@ void GunComponent::shoot(){
 void GunComponent::Update(double delta_time) {
 	position_ = parent_->GetPosition();
 	SetRotation(parent_->GetRotation());
+	position_ += GetBearing() * 0.45f;
 	GameObject::Update(delta_time);
 }

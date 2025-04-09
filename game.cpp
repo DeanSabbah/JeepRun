@@ -71,14 +71,17 @@ void Game::SetupGameWorld(void)
            bullet_ammo = 13,
            yellow_orb = 14,
            text = 15,
-           wanderer = 16};
-    textures.push_back("/textures/Ship_4.png"); 
+           wanderer = 16,
+           barrel = 17,
+           rocket = 18
+    };
+    textures.push_back("/textures/jeep_trailcat.png"); 
     textures.push_back("/textures/ZombieToast.png"); 
     textures.push_back("/textures/gun.png");
     textures.push_back("/textures/desert.png");
     textures.push_back("/textures/orb.png");
     textures.push_back("/textures/Explosion.png");
-	textures.push_back("/textures/Player_invincible.png");
+	textures.push_back("/textures/turret_01_mk1.png");
 	textures.push_back("/textures/FireBall.png");
 	textures.push_back("/textures/bullet.png");
 	textures.push_back("/textures/roc.png");
@@ -89,6 +92,8 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/orb_yellow.png");
     textures.push_back("/textures/font.png");
     textures.push_back("/textures/idle.png");
+    textures.push_back("/textures/barrel_01_mk1.png");
+    textures.push_back("/textures/rocket_01_mk1.png");
     // Load textures
     LoadTextures(textures);
 
@@ -97,7 +102,7 @@ void Game::SetupGameWorld(void)
 
     // Setup the player object (position, texture, vertex count)
     // Note that, in this specific implementation, the player object should always be the first object in the game object vector 
-    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.0f, 1.0f), 0.4f, window_));
+    game_objects_.push_back(new PlayerGameObject(glm::vec3(0.0f, 0.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_red_ship], glm::vec2(1.5f, 1.0f), 0.4f, window_));
     float pi_over_two = glm::pi<float>() / 2.0f;
     game_objects_[0]->SetRotation(pi_over_two);
 
