@@ -46,14 +46,12 @@ void GunComponent::shoot(){
 			if (ammo_bullet_ > 0) {
 				ammo_bullet_--;
 				cooldown_bullet->Start(fire_rate_);
-				std::cout << "Num Bullets left: " << ammo_bullet_ << std::endl;
 			}
 			break;
 		case 1:
 			if (ammo_missile_ > 0) {
 				ammo_missile_--;
 				cooldown_missile->Start(fire_rate_);
-				std::cout << "Num Missiles left: " << ammo_missile_ << std::endl;
 			}
 			break;
 	}
