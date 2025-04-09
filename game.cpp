@@ -55,8 +55,8 @@ void Game::SetupGameWorld(void)
     // Declare all the textures here
     std::vector<std::string> textures;
     enum { tex_red_ship = 0,
-           tex_green_ship = 1,
-           tex_blue_ship = 2,
+           kamekaze = 1,
+           ranged= 2,
            tex_stars = 3,
            tex_orb = 4,
            explosion = 5,
@@ -69,10 +69,11 @@ void Game::SetupGameWorld(void)
            health = 12,
            bullet_ammo = 13,
            yellow_orb = 14,
-           text = 15};
+           text = 15,
+           wanderer = 16};
     textures.push_back("/textures/Ship_4.png"); 
-    textures.push_back("/textures/Ship_2.png"); 
-    textures.push_back("/textures/Ship_5.png");
+    textures.push_back("/textures/ZombieToast.png"); 
+    textures.push_back("/textures/gun.png");
     textures.push_back("/textures/stars.png");
     textures.push_back("/textures/orb.png");
     textures.push_back("/textures/Explosion.png");
@@ -86,6 +87,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/ammo-rifle 32px.png");
     textures.push_back("/textures/orb_yellow.png");
     textures.push_back("/textures/font.png");
+    textures.push_back("/textures/idle.png");
     // Load textures
     LoadTextures(textures);
 
@@ -99,9 +101,9 @@ void Game::SetupGameWorld(void)
     game_objects_[0]->SetRotation(pi_over_two);
 
     // Setup other objects
-    game_objects_.push_back(new KamikazeEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_green_ship], glm::vec2(1.0f, 1.0f), 0.4f));
+    game_objects_.push_back(new KamikazeEnemyObject(glm::vec3(-5.0f, 5.0f, 0.0f), sprite_, &sprite_shader_, tex_[1], glm::vec2(1.0f), 0.4f));
     game_objects_[1]->SetRotation(pi_over_two);
-    game_objects_.push_back(new KamikazeEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[tex_blue_ship], glm::vec2(1.0f, 1.0f), 0.4f));
+    game_objects_.push_back(new KamikazeEnemyObject(glm::vec3(5.0f, -4.5f, 0.0f), sprite_, &sprite_shader_, tex_[1], glm::vec2(1.0f), 0.4f));
     game_objects_[2]->SetRotation(pi_over_two);
 	// Setup collectible objects in random locations
 	for (int i = 0; i < 90; i++) {
@@ -293,7 +295,6 @@ void Game::Update(double delta_time)
             glm::vec3 enemy_pos = ranged_enemy_curr->GetPosition();
             glm::vec3 direction_to_player = glm::normalize(player_pos - enemy_pos);
 
-            // Assuming the enemy's forward direction is along the x-axis after applying its rotation
             glm::vec3 enemy_forward = glm::vec3(cos(ranged_enemy_curr->GetRotation()), sin(ranged_enemy_curr->GetRotation()), 0.0f);
 
             // Normalize vectors
@@ -303,16 +304,13 @@ void Game::Update(double delta_time)
             float dot_product = glm::dot(direction_to_player, enemy_forward);
 
             // Calculate angle
-            float angle = acos(dot_product); // Angle in radians
+            float angle = acos(dot_product);
             float angle_degrees = glm::degrees(angle);
 
-            // Check if the player is within ±30 degrees
-            if (angle_degrees <= 30.0f) {
-                // Player is within ±30 degrees of where the enemy is looking
-                if (ranged_enemy_curr->getShootTimer()->Finished()) {
-                    game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[8], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
-                    ranged_enemy_curr->getShootTimer()->Start(2);
-                }
+            // Player is within ±30 degrees of where the enemy is looking
+            if (ranged_enemy_curr->getShootTimer()->Finished()) {
+                game_objects_.insert(game_objects_.begin() + 1, new EnemyProjectileObject(ranged_enemy_curr->GetPosition(), ranged_enemy_curr->GetBearing(), sprite_, &sprite_shader_, tex_[8], glm::vec2(0.2, 0.2), 8.0f, 1, 5.0f, 0.1f));
+                ranged_enemy_curr->getShootTimer()->Start(2);
             }
         }
         if (kamikaze_enemy_curr && !kamikaze_enemy_curr->isDying()) {
@@ -673,12 +671,12 @@ void Game::SpawnObject() {
 	float y = (rand() % 30) - 15;
     int random = rand() % 10;
     if (random == 0) {
-		KamikazeEnemyObject* new_enemy = new KamikazeEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[0], glm::vec2(1.0f, 1.0f), 0.4f);
+		KamikazeEnemyObject* new_enemy = new KamikazeEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[1], glm::vec2(1.0f, 1.0f), 0.4f);
 		new_enemy->SetRotation(pi_over_two);
 		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);
     }
 	else if (random >= 1 && random <= 5) {
-		WanderingEnemyObject* new_enemy = new WanderingEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[1], glm::vec2(1.0f, 1.0f), 0.4f);
+		WanderingEnemyObject* new_enemy = new WanderingEnemyObject(glm::vec3(x, y, 0.0f), sprite_, &sprite_shader_, tex_[16], glm::vec2(1.0f, 1.0f), 0.4f);
 		new_enemy->SetRotation(pi_over_two);
 		game_objects_.insert(game_objects_.begin() + game_objects_.size() - BACKGROUND_OBJECTS, new_enemy);
 	}

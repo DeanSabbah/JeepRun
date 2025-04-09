@@ -32,3 +32,17 @@ SOURCES:
 
 	2D Health & Ammo Pickups: https://fightswithbears.itch.io/2d-health-and-ammo-pickups
 	Licence: "Feel free to use for whatever."
+
+	Zombie Toast: https://lhteam.itch.io/zombie-toast
+	Licence: You can use these for what ever you'd like, but be sure to tag my twitter
+	https://twitter.com/LazyHamsters
+
+	Zombie || Pixel Asset Pack: https://pop-shop-packs.itch.io/zombies
+	Licence:You can use this asset in any game project, personal or commercial
+		DO NOT resell or redistribute AS A GAME ASSET, it has to be part of a project
+		Credit not necessary but appreciated, if you do you can link to my itch.io profile
+		Modify to suit your needs
+		You are NOT allowed to turn any of my assets to an NFT.
+
+	2D Pixel Guns pack: https://munstudios.itch.io/2d-pixel-guns-pack
+	You can use them in any of your 2d pixel art-based games or prototypes. All the guns are free.
