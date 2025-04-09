@@ -10,6 +10,7 @@
 #include "sprite.h"
 #include "shader.h"
 #include "player_game_object.h"
+#include "background_game_object.h"
 #include "collectible_game_object.h"
 #include "enemy_game_object.h"
 #include "wandering_enemy_object.h"
@@ -70,7 +71,7 @@ void Game::SetupGameWorld(void)
     textures.push_back("/textures/Ship_4.png"); 
     textures.push_back("/textures/Ship_2.png"); 
     textures.push_back("/textures/Ship_5.png");
-    textures.push_back("/textures/stars.png");
+    textures.push_back("/textures/desert.png");
     textures.push_back("/textures/orb.png");
     textures.push_back("/textures/Explosion.png");
 	textures.push_back("/textures/Player_invincible.png");
@@ -122,11 +123,28 @@ void Game::SetupGameWorld(void)
     // Setup background
     // In this specific implementation, the background is always the
     // last 9 objects
-    for (int i = -1; i < 2; i++) {
+    /*for (int i = -1; i < 2; i++) {
         for (int j = -1; j < 2; j++) {
 			GameObject* background = new GameObject(glm::vec3(i * 12.0f, j * 12.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_stars], glm::vec2(1.0f, 1.0f));
 			background->SetScale(glm::vec2(12.0, 12.0));
 			game_objects_.push_back(background);
+        }
+    }*/
+    
+    /*glBindTexture(GL_TEXTURE_2D, tex_[tex_stars]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Repeat horizontally
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Repeat vertically
+
+    glUniform2f(glGetUniformLocation(shader_id, "uv_repeat"), 5.0f, 5.0f);*/
+
+    BackgroundGameObject* background = new BackgroundGameObject(glm::vec3(12.0f, 12.0f, 0.0f), sprite_, &sprite_shader_, tex_[tex_stars], glm::vec2(1.0f, 1.0f));
+    background->SetScale(glm::vec2(12.0f, 12.0f));
+    game_objects_.push_back(background);
+    
+
+    for (int i = 0;i < 12; i++) {
+        for (int j = 0;j < 12;j++) {
+
         }
     }
     
