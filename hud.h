@@ -11,14 +11,17 @@ namespace game {
 
     class HUD {
     public:
-        HUD(Shader* shader, Geometry* geometry, GLuint texture);
+        HUD(Shader* shader, Geometry* geometry, GLuint texture, PlayerGameObject*);
         ~HUD();
 
         void Update(double delta_time);
-        void Render(glm::mat4 view_matrix);
+        void Render(glm::mat4 view_matrix, double current_time);
 
         void SetHealth(int health);
-        void SetAmmo(int ammo);
+
+		void addHudElement(GameObject* element) {
+			hud_elms_.push_back(element);
+		}
 
     private:
         Shader* shader_;
@@ -26,9 +29,12 @@ namespace game {
         GLuint texture_;
 
         int health_;
-        int ammo_;
+        int ammo_bullets_;
+        int ammo_rockets_;
 
 		PlayerGameObject* player_;
+
+        std::vector<GameObject*> hud_elms_;
     };
 
 } // namespace game

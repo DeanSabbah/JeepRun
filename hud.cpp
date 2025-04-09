@@ -1,36 +1,39 @@
 #include "hud.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "drawing_game_object.h"
+#include "text_game_object.h"
+
 namespace game {
 
-    HUD::HUD(Shader* shader, Geometry* geometry, GLuint texture)
-        : shader_(shader), geometry_(geometry), texture_(texture), health_(100), ammo_(100) {
+    HUD::HUD(Shader* shader, Geometry* geometry, GLuint texture, PlayerGameObject * player)
+        : shader_(shader), geometry_(geometry), texture_(texture), health_(100) {
+        player_ = player;
     }
 
     HUD::~HUD() {}
 
     void HUD::Update(double delta_time) {
-		//health_ = player_->GetHealth();
-		//ammo_ = player_->GetAmmo();
+		health_ = player_->GetHealth();
+        ammo_bullets_ = player_->GetAmmoBullets();
+		ammo_rockets_ = player_->GetAmmoRockets();
+        dynamic_cast<DrawingGameObject*>(hud_elms_[0])->SetHealth(health_);
+		dynamic_cast<TextGameObject*>(hud_elms_[1])->SetAmmoCount(ammo_bullets_);
+		dynamic_cast<TextGameObject*>(hud_elms_[2])->SetAmmoCount(ammo_rockets_);
+
+		// Update the HUD elements
+		for (GameObject* elm : hud_elms_) {
+			elm->Update(delta_time);
+		}
     }
 
-    void HUD::Render(glm::mat4 view_matrix) {
-        // Render health bar
-        glm::mat4 health_transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.9f, 0.8f, 0.0f));
-        health_transform = glm::scale(health_transform, glm::vec3(0.2f * health_ / 100.0f, 0.05f, 1.0f));
-        shader_->SetUniformMat4("transform", view_matrix * health_transform);
-
-        // Render ammo counter
-        glm::mat4 ammo_transform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.9f, 0.7f, 0.0f));
-        ammo_transform = glm::scale(ammo_transform, glm::vec3(0.2f * ammo_ / 50.0f, 0.05f, 1.0f));
-        shader_->SetUniformMat4("transform", view_matrix * ammo_transform);
+    void HUD::Render(glm::mat4 view_matrix, double current_time) {
+        for (GameObject* elm : hud_elms_) {
+			elm->Render(view_matrix, current_time);
+        }
     }
 
     void HUD::SetHealth(int health) {
         health_ = health;
-    }
-
-    void HUD::SetAmmo(int ammo) {
-        ammo_ = ammo;
     }
 } // namespace game

@@ -16,12 +16,18 @@ namespace game {
             // Text to be displayed
             std::string GetText(void) const;
             void SetText(std::string text);
+			// Set the ammo count
+			void SetAmmoCount(int ammo_count) { ammo_count_ = ammo_count; }
+			void SetPos(glm::vec3 pos) { pos_ = pos; }
 
             // Render function for the text
             void Render(glm::mat4 view_matrix, double current_time) override;
 
         private:
             std::string text_;
+            int ammo_count_;
+
+			glm::vec3 pos_;
 
     }; // class TextGameObject
 

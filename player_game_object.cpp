@@ -9,7 +9,7 @@ namespace game {
 	*/
 
 	PlayerGameObject::PlayerGameObject(const glm::vec3& position, Geometry* geom, Shader* shader, GLuint texture, glm::vec2& scale, const float radius, GLFWwindow* window) : GameObject(position, geom, shader, texture, scale), ColliderObject(radius) {
-		health = 3;
+		health = 15;
 		invincibility_timer = new Timer();
 		window_ = window;
 		turret_component_ = new TurretComponent(position, geom, shader, 6, scale, radius, this);

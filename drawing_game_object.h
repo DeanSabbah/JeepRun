@@ -9,10 +9,16 @@ namespace game {
     class DrawingGameObject : public GameObject {
 
         public:
-            DrawingGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture);
+            DrawingGameObject(const glm::vec3 &position, Geometry *geom, Shader *shader, GLuint texture, glm::vec2 offset);
 
+			void SetHealth(float health) { health_ = health; }
             // Render function for the text
             void Render(glm::mat4 view_matrix, double current_time) override;
+        private:
+			const glm::vec2 offset_;
+			float health_;
+			float max_health_ = 15;
+
 
     }; // class DrawingGameObject
 

@@ -21,7 +21,7 @@ namespace game {
 
 	bool Timer::Finished(){
 		// Check if the timer has finished, only return true once
-		if (glfwGetTime() - start_time_ > end_time_ && !checked) {
+		if (glfwGetTime() - start_time_ > end_time_) {
 			checked = true;
 			return true;
 			running = false;

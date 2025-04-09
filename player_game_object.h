@@ -37,7 +37,8 @@ namespace game {
 			// Get the velocity of the player
 			float get_velocity() const;
 			int GetHealth() const { return health; }
-			int GetAmmo() const { return gun_component_->getAmmo(); }
+			int GetAmmoBullets() const { return gun_component_->getAmmoBullets(); }
+			int GetAmmoRockets() const { return gun_component_->getAmmoRockets(); }
 			// Get the window
 			inline GLFWwindow* get_window() const { return window_; }
 			// Get component at index i
